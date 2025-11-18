@@ -1,8 +1,9 @@
-
+import 'dart:io';
 import 'package:animal_kart_demo2/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pinput/pinput.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   const OtpScreen({super.key});
@@ -14,11 +15,37 @@ class OtpScreen extends ConsumerStatefulWidget {
 class _OtpScreenState extends ConsumerState<OtpScreen> {
   final otpController = TextEditingController();
 
+  String deviceId = "";
+  String deviceModel = "";
+
+  @override
+  void initState() {
+    super.initState();
+    getDeviceInfo();
+  }
+
+  Future<void> getDeviceInfo() async {
+    final deviceInfo = DeviceInfoPlugin();
+
+    if (Platform.isAndroid) {
+      final android = await deviceInfo.androidInfo;
+      setState(() {
+        deviceId = android.id ?? "";
+        deviceModel = android.model ?? "";
+      });
+    } else if (Platform.isIOS) {
+      final ios = await deviceInfo.iosInfo;
+      setState(() {
+        deviceId = ios.identifierForVendor ?? "";
+        deviceModel = ios.utsname.machine ?? "";
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
 
-    /// PIN PUT THEME
     final defaultPinTheme = PinTheme(
       width: 56,
       height: 56,
@@ -31,14 +58,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey.shade300),
       ),
-    );
-
-    final focusedPinTheme = defaultPinTheme.copyDecorationWith(
-      border: Border.all(color: Colors.blueAccent, width: 2),
-    );
-
-    final submittedPinTheme = defaultPinTheme.copyDecorationWith(
-      color: Colors.blue.shade50,
     );
 
     return Scaffold(
@@ -59,19 +78,19 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               const SizedBox(height: 30),
 
-              /// 🔥 NEW OPT INPUT FIELD
+              /// OTP Input
               Pinput(
                 controller: otpController,
                 length: 6,
                 defaultPinTheme: defaultPinTheme,
-                focusedPinTheme: focusedPinTheme,
-                submittedPinTheme: submittedPinTheme,
                 pinAnimationType: PinAnimationType.scale,
-                keyboardType: TextInputType.number,
                 autofocus: true,
                 onCompleted: (value) {
-                  // Auto-trigger on 6 digits
-                  ref.read(authProvider.notifier).verifyOtp(value);
+                  ref.read(authProvider.notifier).verifyOtp(
+                        value,
+                        deviceId,
+                        deviceModel,
+                      );
 
                   if (ref.read(authProvider).isVerified) {
                     Navigator.pushNamedAndRemoveUntil(
@@ -94,14 +113,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               const SizedBox(height: 20),
 
-              /// Submit OTP Button
+              /// Submit OTP button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    ref
-                        .read(authProvider.notifier)
-                        .verifyOtp(otpController.text.trim());
+                    ref.read(authProvider.notifier).verifyOtp(
+                          otpController.text.trim(),
+                          deviceId,
+                          deviceModel,
+                        );
 
                     if (ref.read(authProvider).isVerified) {
                       Navigator.pushNamedAndRemoveUntil(
@@ -123,6 +144,14 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 20),
+
+              /// 👀 (Optional debugging)
+              Text("Device ID: $deviceId",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+              Text("Device Model: $deviceModel",
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
         ),

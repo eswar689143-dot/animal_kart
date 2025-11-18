@@ -51,13 +51,22 @@ class AuthController extends StateNotifier<AuthState> {
     state = state.copyWith(phoneNumber: phone, otpSent: true, error: "");
   }
 
-  /// Step 2: Verify OTP
-  void verifyOtp(String otp) {
-    if (otp != "123456") {
-      state = state.copyWith(error: "Invalid OTP");
-      return;
-    }
+ void verifyOtp(
+  String otp,
+  String deviceId,
+  String deviceModel,
+) {
+  print("🔐 OTP Verification Called:");
+  print("📱 Device ID: $deviceId");
+  print("📟 Device Model: $deviceModel");
 
-    state = state.copyWith(isVerified: true, error: "");
+  if (otp != "123456") {
+    state = state.copyWith(error: "Invalid OTP");
+    return;
   }
+
+  // OTP success
+  state = state.copyWith(isVerified: true, error: "");
+}
+
 }
