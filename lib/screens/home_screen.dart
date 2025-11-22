@@ -3,6 +3,7 @@ import 'package:animal_kart_demo2/controllers/cart_provider.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/buffalo_list_screen.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/cart_screen.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/user_profile_screen.dart';
+import 'package:animal_kart_demo2/screens/tabs_screens/wishlist_screen.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     _pages = const [
       BuffaloListScreen(),
-      _SearchPage(),
+      WishlistScreen(),
       CartScreen(showAppBar: false),  // <- AppBar handled inside CartScreen
       UserProfileScreen(),
     ];
@@ -193,11 +194,3 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-class _SearchPage extends StatelessWidget {
-  const _SearchPage();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Saved buffalos will appear here'));
-  }
-}

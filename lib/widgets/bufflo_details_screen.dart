@@ -19,6 +19,8 @@ class BuffaloDetailsScreen extends ConsumerStatefulWidget {
 class _BuffaloDetailsScreenState
     extends ConsumerState<BuffaloDetailsScreen> {
   int qty = 1;
+  bool isFavorite = false;
+
 
   late PageController _pageController;
   int currentIndex = 0;
@@ -86,18 +88,30 @@ class _BuffaloDetailsScreenState
           body: Column(
             children: [
               const SizedBox(height: 8),
-              
-              // IMAGE CAROUSEL
+            
+              Expanded(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          padding: const EdgeInsets.only(bottom: 20),
+
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+
+              // ---------------------- IMAGE CAROUSEL ----------------------
               SizedBox(
-                height: 260,
+                height: 350,
                 child: Stack(
                   alignment: Alignment.bottomCenter,
                   children: [
                     PageView.builder(
                       controller: _pageController,
                       itemCount: imageList.length,
-                      onPageChanged: (index) =>
-                          setState(() => currentIndex = index),
+                      onPageChanged: (i) => setState(() => currentIndex = i),
                       itemBuilder: (_, index) {
                         final img = imageList[index];
                         final isNetwork = img.startsWith("http");
@@ -117,10 +131,11 @@ class _BuffaloDetailsScreenState
                         );
                       },
                     ),
+                   
 
-                    // DOTS
+                    // DOT INDICATORS
                     Positioned(
-                      bottom: 10,
+                      bottom: 12,
                       child: Row(
                         children: List.generate(
                           imageList.length,
@@ -143,50 +158,40 @@ class _BuffaloDetailsScreenState
                 ),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 22),
 
-              // DETAILS CONTAINER
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    padding: const EdgeInsets.all(18),
-                    decoration: BoxDecoration(
-                      color: kCardBg,
-                      borderRadius: BorderRadius.circular(20),
+              // ---------------------- TEXT DETAILS ----------------------
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      buffalo.breed,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(buffalo.breed,
-                            style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w700)),
 
-                        const SizedBox(height: 6),
+                    const SizedBox(height: 16),
 
-                        Text(
-                          "${buffalo.milkYield} L/day • Insurance ₹${buffalo.insurance}",
-                          style: const TextStyle(
-                              color: Colors.grey, fontSize: 15),
-                        ),
-
-                        const SizedBox(height: 16),
-
-                        Text(
-                          buffalo.description,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              height: 1.4,
-                              color: Colors.black87),
-                        ),
-                      ],
+                    Text(
+                      buffalo.description,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        height: 1.5,
+                        color: Colors.black87,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
-
-              // BOTTOM CART PANEL
+            ],
+          ),
+        ),
+      ),
+    ),
               Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 12),

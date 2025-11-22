@@ -12,14 +12,28 @@ class BuffaloListScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final buffalos = ref.watch(buffaloListProvider);
+    final buffaloAsync = ref.watch(buffaloListProvider);
 
     return Container(
       color: kScreenBg,
-      child: ListView.builder(
-        padding: const EdgeInsets.only(bottom: 90, top: 12),
-        itemCount: buffalos.length,
-        itemBuilder: (context, i) => BuffaloCard(buffalo: buffalos[i]),
+      child: buffaloAsync.when(
+        loading: () => const Center(
+          child: CircularProgressIndicator(color: kPrimaryGreen),
+        ),
+
+        error: (err, _) => Center(
+          child: Text(
+            "Failed to load buffalos\n$err",
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16),
+          ),
+        ),
+
+        data: (buffalos) => ListView.builder(
+          padding: const EdgeInsets.only(bottom: 90, top: 12),
+          itemCount: buffalos.length,
+          itemBuilder: (context, i) => BuffaloCard(buffalo: buffalos[i]),
+        ),
       ),
     );
   }

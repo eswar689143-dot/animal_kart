@@ -26,7 +26,7 @@ class ApiServices {
 
     return const DeviceDetails(id: '', model: '');
   }
-   static Future<Buffalo> fetchBuffaloById(String id) async {
+static Future<Buffalo> fetchBuffaloById(String id) async {
     final url =
         '${AppConstants.apiUrl}/products/$id';
 
@@ -39,4 +39,19 @@ class ApiServices {
       throw Exception("Failed to load buffalo details");
     }
   }
+
+static Future<List<Buffalo>> fetchBuffaloList() async {
+  final url = '${AppConstants.apiUrl}/products';
+
+  final res = await http.get(Uri.parse(url));
+
+  if (res.statusCode == 200) {
+    final data = json.decode(res.body);
+
+    return (data as List).map((json) => Buffalo.fromJson(json)).toList();
+  } else {
+    throw Exception("Failed to load buffalo list");
+  }
+}
+
 }

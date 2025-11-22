@@ -60,40 +60,4 @@ class AppText {
     fontWeight: FontWeight.w700,
   );
 
-  // --------------------------
-  // SEMI-BOLD ITALIC (600 + italic)
-  // --------------------------
-  static const semiBoldItalic14 = TextStyle(
-    fontFamily: _font,
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-    fontStyle: FontStyle.italic,
-  );
-
-  static const semiBoldItalic16 = TextStyle(
-    fontFamily: _font,
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-    fontStyle: FontStyle.italic,
-  );
-
-  // --------------------------
-  // THIN ITALIC (200)
-  // --------------------------
-  static const thinItalic14 = TextStyle(
-    fontFamily: _font,
-    fontSize: 14,
-    fontWeight: FontWeight.w200,
-    fontStyle: FontStyle.italic,
-  );
-
-  // --------------------------
-  // ULTRA LIGHT ITALIC (100)
-  // --------------------------
-  static const ultraLightItalic14 = TextStyle(
-    fontFamily: _font,
-    fontSize: 14,
-    fontWeight: FontWeight.w100,
-    fontStyle: FontStyle.italic,
-  );
 }
