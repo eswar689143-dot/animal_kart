@@ -9,6 +9,7 @@ import 'package:animal_kart_demo2/widgets/theme_toggle_button.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:animal_kart_demo2/routes/routes.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -42,7 +43,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final cart = ref.watch(cartProvider);
 
     return Scaffold(
-      backgroundColor: Theme.of(context).mainThemeColor,
+      backgroundColor: Theme.of(context).mainThemeBgColor,
 
       // ---- CONDITIONAL APPBAR ----
       appBar: AppBar(
@@ -62,7 +63,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
-          ThemeToggleButton(),
+          // ThemeToggleButton(),
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Container(
