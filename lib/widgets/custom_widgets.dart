@@ -34,3 +34,6 @@ Widget genderButton({
     ],
   );
 }
+
+
+const _headerStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.w600);

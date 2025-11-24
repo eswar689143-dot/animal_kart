@@ -1,18 +1,24 @@
 import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartItem {
-  final int qty;
-  final int insurancePaid;
+  final int qty; // units (1 unit = 2 buffaloes)
+  final int insuranceUnits; // how many units of insurance user selected
 
-  CartItem({required this.qty, required this.insurancePaid});
+  CartItem({
+    required this.qty,
+    required this.insuranceUnits,
+  });
 
   Map<String, dynamic> toJson() =>
-      {"qty": qty, "insurancePaid": insurancePaid};
+      {"qty": qty, "insuranceUnits": insuranceUnits};
 
-  factory CartItem.fromJson(Map<String, dynamic> json) =>
-      CartItem(qty: json["qty"], insurancePaid: json["insurancePaid"]);
+  factory CartItem.fromJson(Map<String, dynamic> json) => CartItem(
+        qty: json["qty"],
+        insuranceUnits: json["insuranceUnits"],
+      );
 }
 
 class CartController extends StateNotifier<Map<String, CartItem>> {
@@ -20,7 +26,7 @@ class CartController extends StateNotifier<Map<String, CartItem>> {
     _loadCart();
   }
 
-  /// ---------- LOAD CART ----------
+  // LOAD CART
   Future<void> _loadCart() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString("cartData");
@@ -28,7 +34,6 @@ class CartController extends StateNotifier<Map<String, CartItem>> {
     if (jsonString == null) return;
 
     final decoded = jsonDecode(jsonString) as Map<String, dynamic>;
-
     final loaded = decoded.map(
       (key, value) =>
           MapEntry(key, CartItem.fromJson(value as Map<String, dynamic>)),
@@ -37,42 +42,42 @@ class CartController extends StateNotifier<Map<String, CartItem>> {
     state = loaded;
   }
 
-  /// ---------- SAVE CART ----------
+  // SAVE CART
   Future<void> _saveCart() async {
     final prefs = await SharedPreferences.getInstance();
-
-    final encoded = jsonEncode(
-      state.map((key, item) => MapEntry(key, item.toJson())),
-    );
-
+    final encoded =
+        jsonEncode(state.map((key, item) => MapEntry(key, item.toJson())));
     prefs.setString("cartData", encoded);
   }
 
-  /// ---------- CLEAR CART ----------
+  // CLEAR CART
   Future<void> clearCart() async {
     state = {};
     final prefs = await SharedPreferences.getInstance();
     prefs.remove("cartData");
   }
 
-  /// ---------- ADD / UPDATE ITEM ----------
-  void setItem(String id, int qty, int insurancePerBuffalo) {
+  // ADD / UPDATE ITEM
+  void setItem(String id, int qty, int insuranceUnits) {
     if (qty <= 0) {
       remove(id);
       return;
     }
 
-    final insurancePaid = insurancePerBuffalo;
+    // insurance cannot be more than qty
+    if (insuranceUnits > qty) {
+      insuranceUnits = qty;
+    }
 
     state = {
       ...state,
-      id: CartItem(qty: qty, insurancePaid: insurancePaid),
+      id: CartItem(qty: qty, insuranceUnits: insuranceUnits),
     };
 
-    _saveCart(); // SAVE AFTER UPDATE
+    _saveCart();
   }
 
-  /// ---------- REMOVE ITEM ----------
+  // REMOVE ITEM
   void remove(String id) {
     final copy = {...state};
     copy.remove(id);
@@ -80,16 +85,30 @@ class CartController extends StateNotifier<Map<String, CartItem>> {
     _saveCart();
   }
 
-  /// ---------- INCREASE ----------
-  void increase(String id) {
+  // UNIT INCREASE
+  void increaseUnits(String id) {
     final old = state[id]!;
-    setItem(id, old.qty + 1, old.insurancePaid);
+    setItem(id, old.qty + 1, old.insuranceUnits);
   }
 
-  /// ---------- DECREASE ----------
-  void decrease(String id) {
+  // UNIT DECREASE
+  void decreaseUnits(String id) {
     final old = state[id]!;
-    setItem(id, old.qty - 1, old.insurancePaid);
+    setItem(id, old.qty - 1, old.insuranceUnits);
+  }
+
+  // INSURANCE INCREASE
+  void increaseInsurance(String id) {
+    final old = state[id]!;
+    if (old.insuranceUnits >= old.qty) return;
+    setItem(id, old.qty, old.insuranceUnits + 1);
+  }
+
+  // INSURANCE DECREASE
+  void decreaseInsurance(String id) {
+    final old = state[id]!;
+    if (old.insuranceUnits <= 0) return;
+    setItem(id, old.qty, old.insuranceUnits - 1);
   }
 }
 
