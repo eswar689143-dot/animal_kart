@@ -4,9 +4,11 @@ import 'package:animal_kart_demo2/screens/services/razorpay_service.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
+import 'package:animal_kart_demo2/utils/svg_utils.dart';
 import 'package:animal_kart_demo2/widgets/successful_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import '../../models/buffalo.dart';
 
 class CartScreen extends ConsumerWidget {
@@ -19,59 +21,19 @@ class CartScreen extends ConsumerWidget {
     final buffaloAsync = ref.watch(buffaloListProvider);
 
     return buffaloAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
 
-      error: (err, _) => Scaffold(
-        body: Center(child: Text("Failed to load buffalos\n$err")),
-      ),
+      error: (err, _) =>
+          Scaffold(body: Center(child: Text("Failed to load buffalos\n$err"))),
 
       data: (buffaloList) {
         final items = buffaloList.where((b) => cart.containsKey(b.id)).toList();
 
         if (items.isEmpty) {
           return Scaffold(
-            appBar:
-                showAppBar
-                    ? AppBar(
-                      elevation: 2,
-                      backgroundColor: Theme.of(context).mainThemeBgColor,
-                      toolbarHeight: 48,
-                      leading: IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.black,
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                      title: const Text(
-                        "Cart",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 22,
-                          color: Colors.black,
-                        ),
-                      ),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          bottom: Radius.circular(30),
-                        ),
-                      ),
-                    )
-                    : null,
-            body: const Center(
-              child: Text("Your cart is empty", style: TextStyle(fontSize: 18)),
-            ),
-          );
-        }
-
-
-        return Scaffold(
-          backgroundColor: Theme.of(context).mainThemeBgColor,
-           appBar:
-              showAppBar
-                  ? AppBar(
+            appBar: showAppBar
+                ? AppBar(
                     elevation: 2,
                     backgroundColor: Theme.of(context).mainThemeBgColor,
                     toolbarHeight: 48,
@@ -96,7 +58,42 @@ class CartScreen extends ConsumerWidget {
                       ),
                     ),
                   )
-                  : null,
+                : null,
+            body: const Center(
+              child: Text("Your cart is empty", style: TextStyle(fontSize: 18)),
+            ),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: Theme.of(context).mainThemeBgColor,
+          appBar: showAppBar
+              ? AppBar(
+                  elevation: 2,
+                  backgroundColor: Theme.of(context).mainThemeBgColor,
+                  toolbarHeight: 48,
+                  leading: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.black,
+                    ),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  title: const Text(
+                    "Cart",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 22,
+                      color: Colors.black,
+                    ),
+                  ),
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(30),
+                    ),
+                  ),
+                )
+              : null,
 
           bottomNavigationBar: _checkoutButton(context, ref, items, cart),
 
@@ -149,12 +146,25 @@ class CartScreen extends ConsumerWidget {
                     child: GestureDetector(
                       onTap: () => _confirmDelete(context, ref, buff.id),
                       child: Container(
+                        height: 30,
+                        width: 30,
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade100,
+                          boxShadow: [
+                            BoxShadow(
+                              blurRadius: 10,
+                              color: Colors.black.withOpacity(0.06),
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                          border: Border.all(color: akBlackColor38, width: 0.5),
                           shape: BoxShape.circle,
+                          color: akWhiteColor,
                         ),
-                        child: const Icon(Icons.delete, color: Colors.red, size: 20),
+                        child: SvgPicture.string(
+                          SvgUtils().deleteIcon,
+                          color: akRedColor,
+                        ) /* Icon(Icons.delete, color: Colors.red, size: 20) */,
                       ),
                     ),
                   ),
@@ -228,20 +238,28 @@ class CartScreen extends ConsumerWidget {
         const SizedBox(height: 22),
 
         // PRICE BREAKDOWN
-        const Text("Price Breakdown",
-            style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+        const Text(
+          "Price Breakdown",
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+        ),
         const SizedBox(height: 10),
 
-        _priceRow("Buffalo Price",
-            "₹${AppConstants().formatIndianAmount(price)}"),
-        _priceRow("Insurance",
-            "₹${AppConstants().formatIndianAmount(insuranceAmount)}"),
+        _priceRow(
+          "Buffalo Price",
+          "₹${AppConstants().formatIndianAmount(price)}",
+        ),
+        _priceRow(
+          "Insurance",
+          "₹${AppConstants().formatIndianAmount(insuranceAmount)}",
+        ),
 
         const Divider(height: 30),
 
-        _priceRow("Total",
-            "₹${AppConstants().formatIndianAmount(total)}",
-            isBold: true),
+        _priceRow(
+          "Total",
+          "₹${AppConstants().formatIndianAmount(total)}",
+          isBold: true,
+        ),
 
         const SizedBox(height: 20),
 
@@ -310,8 +328,10 @@ class CartScreen extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text("Insurance Selection",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+          const Text(
+            "Insurance Selection",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+          ),
 
           const SizedBox(height: 8),
 
@@ -323,14 +343,17 @@ class CartScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Insurance Units",
-                  style: TextStyle(fontWeight: FontWeight.w600)),
+              const Text(
+                "Insurance Units",
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
 
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () =>
-                        ref.read(cartProvider.notifier).decreaseInsurance(buff.id),
+                    onTap: () => ref
+                        .read(cartProvider.notifier)
+                        .decreaseInsurance(buff.id),
                     child: _circleButton(Icons.remove),
                   ),
                   const SizedBox(width: 18),
@@ -338,20 +361,23 @@ class CartScreen extends ConsumerWidget {
                   Text(
                     "$insuranceUnits",
                     style: const TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.w700),
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
 
                   const SizedBox(width: 18),
 
                   GestureDetector(
-                    onTap: () =>
-                        ref.read(cartProvider.notifier).increaseInsurance(buff.id),
+                    onTap: () => ref
+                        .read(cartProvider.notifier)
+                        .increaseInsurance(buff.id),
                     child: _circleButton(Icons.add),
                   ),
                 ],
-              )
+              ),
             ],
-          )
+          ),
         ],
       ),
     );
@@ -372,14 +398,20 @@ class CartScreen extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(left,
-            style: TextStyle(
-                fontSize: 15,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w500)),
-        Text(right,
-            style: TextStyle(
-                fontSize: isBold ? 19 : 15,
-                fontWeight: isBold ? FontWeight.bold : FontWeight.w600)),
+        Text(
+          left,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
+          ),
+        ),
+        Text(
+          right,
+          style: TextStyle(
+            fontSize: isBold ? 19 : 15,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+          ),
+        ),
       ],
     );
   }
@@ -419,8 +451,8 @@ class CartScreen extends ConsumerWidget {
             int totalAmount = 0;
             for (Buffalo b in buffList) {
               final c = cartMap[b.id]!;
-              totalAmount += (b.price * (c.qty * 2)) +
-                  (c.insuranceUnits * b.insurance);
+              totalAmount +=
+                  (b.price * (c.qty * 2)) + (c.insuranceUnits * b.insurance);
             }
 
             razorpay.openPayment(amount: totalAmount);
@@ -428,14 +460,16 @@ class CartScreen extends ConsumerWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: kPrimaryGreen,
             shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40)),
+              borderRadius: BorderRadius.circular(40),
+            ),
           ),
           child: const Text(
             "Proceed to Payment",
             style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w700),
+              color: Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -455,7 +489,9 @@ void _confirmDelete(BuildContext context, WidgetRef ref, String id) {
       content: const Text("Do you want to remove this item?"),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(context), child: const Text("No")),
+          onPressed: () => Navigator.pop(context),
+          child: const Text("No"),
+        ),
         TextButton(
           onPressed: () {
             ref.read(cartProvider.notifier).remove(id);
@@ -505,18 +541,28 @@ Widget _priceExplanation(Buffalo buff, int units, int insuranceUnits) {
 
         _calcLine("Units Selected", "$units units"),
         _calcLine("Total Buffaloes", "$buffaloes buffaloes"),
-        _calcLine("Price per Buffalo",
-            "₹${AppConstants().formatIndianAmount(pricePerBuffalo)}"),
-        _calcLine("Price Per Unit (2 buffaloes)",
-            "₹${AppConstants().formatIndianAmount(pricePerUnit)}"),
-        _calcLine("Total Buffalo Price",
-            "₹${AppConstants().formatIndianAmount(totalBuffaloPrice)}"),
+        _calcLine(
+          "Price per Buffalo",
+          "₹${AppConstants().formatIndianAmount(pricePerBuffalo)}",
+        ),
+        _calcLine(
+          "Price Per Unit (2 buffaloes)",
+          "₹${AppConstants().formatIndianAmount(pricePerUnit)}",
+        ),
+        _calcLine(
+          "Total Buffalo Price",
+          "₹${AppConstants().formatIndianAmount(totalBuffaloPrice)}",
+        ),
 
-        _calcLine("Insurance Per Buffalo",
-            "₹${AppConstants().formatIndianAmount(insurancePerUnit)}"),
+        _calcLine(
+          "Insurance Per Buffalo",
+          "₹${AppConstants().formatIndianAmount(insurancePerUnit)}",
+        ),
         _calcLine("Insurance Units Chosen", "$insuranceUnits units"),
-        _calcLine("Total Insurance Cost",
-            "₹${AppConstants().formatIndianAmount(totalInsurance)}"),
+        _calcLine(
+          "Total Insurance Cost",
+          "₹${AppConstants().formatIndianAmount(totalInsurance)}",
+        ),
 
         const SizedBox(height: 14),
 
@@ -536,9 +582,10 @@ Widget _calcLine(String label, String value) {
     child: Row(
       children: [
         Expanded(
-          child: Text("• $label:",
-              style: const TextStyle(
-                  fontSize: 14, fontWeight: FontWeight.w500)),
+          child: Text(
+            "• $label:",
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+          ),
         ),
         Flexible(
           child: Text(

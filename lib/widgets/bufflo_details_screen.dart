@@ -18,9 +18,8 @@ class BuffaloDetailsScreen extends ConsumerStatefulWidget {
       _BuffaloDetailsScreenState();
 }
 
-class _BuffaloDetailsScreenState
-    extends ConsumerState<BuffaloDetailsScreen> {
-  int qty = 1;   // qty = units
+class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
+  int qty = 1; // qty = units
   int currentIndex = 0;
 
   late PageController _pageController;
@@ -55,12 +54,10 @@ class _BuffaloDetailsScreenState
     final buffaloAsync = ref.watch(buffaloDetailsProvider(widget.buffaloId));
 
     return buffaloAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
 
-      error: (err, _) =>
-          Scaffold(body: Center(child: Text("Error: $err"))),
+      error: (err, _) => Scaffold(body: Center(child: Text("Error: $err"))),
 
       data: (buffalo) {
         final imageList = buffalo.buffaloImages;
@@ -76,8 +73,10 @@ class _BuffaloDetailsScreenState
             backgroundColor: Colors.grey.shade200,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new,
-                  color: Theme.of(context).primaryTextColor),
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: Theme.of(context).primaryTextColor,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             title: Text(
@@ -119,7 +118,9 @@ class _BuffaloDetailsScreenState
                                   itemBuilder: (_, index) {
                                     final img = imageList[index];
                                     return Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                      ),
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(10),
                                         child: Image.network(
@@ -135,22 +136,29 @@ class _BuffaloDetailsScreenState
                                 Positioned(
                                   bottom: 12,
                                   child: Row(
-                                    children: List.generate(
-                                      imageList.length,
-                                      (idx) {
-                                        final active = currentIndex == idx;
-                                        return AnimatedContainer(
-                                          duration: const Duration(milliseconds: 300),
-                                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                                          width: active ? 22 : 8,
-                                          height: 8,
-                                          decoration: BoxDecoration(
-                                            color: active ? Colors.white : Colors.white54,
-                                            borderRadius: BorderRadius.circular(20),
+                                    children: List.generate(imageList.length, (
+                                      idx,
+                                    ) {
+                                      final active = currentIndex == idx;
+                                      return AnimatedContainer(
+                                        duration: const Duration(
+                                          milliseconds: 300,
+                                        ),
+                                        margin: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                        ),
+                                        width: active ? 22 : 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color: active
+                                              ? Colors.white
+                                              : Colors.white54,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
                                           ),
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      );
+                                    }),
                                   ),
                                 ),
                               ],
@@ -206,7 +214,10 @@ class _BuffaloDetailsScreenState
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   color: Theme.of(context).mainThemeBgColor,
                   child: Row(
                     children: [
@@ -214,7 +225,10 @@ class _BuffaloDetailsScreenState
                       Expanded(
                         flex: 1,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color.fromARGB(255, 235, 241, 236),
                             borderRadius: BorderRadius.circular(30),
@@ -227,7 +241,9 @@ class _BuffaloDetailsScreenState
                               }),
 
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 15),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 15,
+                                ),
                                 child: Text(
                                   "$qty",
                                   style: const TextStyle(
@@ -329,105 +345,111 @@ class _BuffaloDetailsScreenState
           const SizedBox(height: 22),
 
           Container(
-  padding: const EdgeInsets.all(18),
-  decoration: BoxDecoration(
-    color: const Color(0xFFEFFFF7),
-    borderRadius: BorderRadius.circular(16),
-    border: Border.all(color: Color(0xFF10B981), width: 1),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black12,
-        blurRadius: 6,
-        offset: Offset(0, 3),
-      ),
-    ],
-  ),
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Row(
-        children: const [
-          Icon(Icons.info_outline, color: Color(0xFF0F9D58), size: 22),
-          SizedBox(width: 8),
-          Text(
-            "Commercial Benefit Explanation",
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF0F9D58),
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEFFFF7),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Color(0xFF10B981), width: 1),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  blurRadius: 6,
+                  offset: Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: const [
+                    Icon(
+                      Icons.info_outline,
+                      color: Color(0xFF0F9D58),
+                      size: 22,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      "Commercial Benefit Explanation",
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF0F9D58),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 14),
+
+                const Text(
+                  "Understanding the Unit System:",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "• 1 Unit = 2 buffaloes.\n"
+                  "• You can choose how many units you want to buy.\n"
+                  "• Insurance is charged per buffalo: ₹13,000 each.\n",
+                  style: TextStyle(fontSize: 14.5, height: 1.45),
+                ),
+
+                const SizedBox(height: 14),
+
+                const Text(
+                  "Free Insurance Offer:",
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 6),
+                const Text(
+                  "• For every 1 Unit (2 buffaloes), you get insurance for 1 buffalo absolutely FREE.\n"
+                  "• Free insurance increases as you buy more units.",
+                  style: TextStyle(fontSize: 14.5, height: 1.45),
+                ),
+
+                const SizedBox(height: 14),
+
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFECFDF5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Example Benefits:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15,
+                          color: Color(0xFF0F9D58),
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        "• Buy 1 Unit (2 buffaloes) → 1 Insurance FREE\n"
+                        "• Buy 2 Units (4 buffaloes) → 2 Insurance FREE\n"
+                        "• Buy 4 Units (8 buffaloes) → 4 Insurance FREE",
+                        style: TextStyle(fontSize: 14.5, height: 1.45),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  "This offer significantly reduces your total insurance cost as you buy more units.",
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-
-      const SizedBox(height: 14),
-
-      const Text(
-        "Understanding the Unit System:",
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 6),
-      const Text(
-        "• 1 Unit = 2 buffaloes.\n"
-        "• You can choose how many units you want to buy.\n"
-        "• Insurance is charged per buffalo: ₹13,000 each.\n",
-        style: TextStyle(fontSize: 14.5, height: 1.45),
-      ),
-
-      const SizedBox(height: 14),
-
-      const Text(
-        "Free Insurance Offer:",
-        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 6),
-      const Text(
-        "• For every 1 Unit (2 buffaloes), you get insurance for 1 buffalo absolutely FREE.\n"
-        "• Free insurance increases as you buy more units.",
-        style: TextStyle(fontSize: 14.5, height: 1.45),
-      ),
-
-      const SizedBox(height: 14),
-
-      Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Color(0xFFECFDF5),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Example Benefits:",
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 15,
-                    color: Color(0xFF0F9D58))),
-            SizedBox(height: 8),
-            Text(
-              "• Buy 1 Unit (2 buffaloes) → 1 Insurance FREE\n"
-              "• Buy 2 Units (4 buffaloes) → 2 Insurance FREE\n"
-              "• Buy 4 Units (8 buffaloes) → 4 Insurance FREE",
-              style: TextStyle(fontSize: 14.5, height: 1.45),
-            ),
-          ],
-        ),
-      ),
-
-      const SizedBox(height: 16),
-
-      const Text(
-        "This offer significantly reduces your total insurance cost as you buy more units.",
-        style: TextStyle(
-          fontSize: 14.5,
-          fontStyle: FontStyle.italic,
-          height: 1.4,
-        ),
-      ),
-    ],
-  ),
-),
-
         ],
       ),
     );
@@ -438,6 +460,7 @@ class _BuffaloDetailsScreenState
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       decoration: const BoxDecoration(
         color: Color(0xFFDFF7ED),
+
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
       child: Row(
@@ -459,17 +482,21 @@ class _BuffaloDetailsScreenState
   Widget _unitRow(String title, int price, int ins, int freeCount) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-      decoration: const BoxDecoration(color: Color(0xFFF4FFFA)),
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+        color: Color(0xFFF4FFFA),
+      ),
       child: Row(
         children: [
           Expanded(child: Text(title, style: const TextStyle(fontSize: 14))),
-          Expanded(child: Text("₹$price", style: const TextStyle(fontSize: 14))),
+          Expanded(
+            child: Text("₹$price", style: const TextStyle(fontSize: 14)),
+          ),
           Expanded(
             child: Text(
               "₹$ins(Free: $freeCount)",
               textAlign: TextAlign.right,
-              style:
-                  const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
             ),
           ),
         ],
