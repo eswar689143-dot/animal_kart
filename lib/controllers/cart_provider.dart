@@ -1,11 +1,10 @@
 import 'dart:convert';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class CartItem {
-  final int qty; // units (1 unit = 2 buffaloes)
-  final int insuranceUnits; // how many units of insurance user selected
+  final int qty; 
+  final int insuranceUnits; 
 
   CartItem({
     required this.qty,

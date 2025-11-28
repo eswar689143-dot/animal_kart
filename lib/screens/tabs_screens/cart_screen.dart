@@ -5,7 +5,8 @@ import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:animal_kart_demo2/utils/svg_utils.dart';
-import 'package:animal_kart_demo2/widgets/successful_screen.dart';
+import 'package:animal_kart_demo2/widgets/payment_widgets/manual_payment_screen.dart';
+import 'package:animal_kart_demo2/widgets/payment_widgets/successful_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -219,8 +220,8 @@ class CartScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
 
-                  Text("Units: $units"),
-                  Text("Buffaloes: $buffaloCount"),
+                  Text("Units: $units",style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text("Buffaloes: $buffaloCount  (2 Calf)",style: TextStyle(fontWeight: FontWeight.bold),),
                   Text("Milk Yield: ${buff.milkYield} L/day"),
 
                   const SizedBox(height: 10),
@@ -249,7 +250,7 @@ class CartScreen extends ConsumerWidget {
           "₹${AppConstants().formatIndianAmount(price)}",
         ),
         _priceRow(
-          "Insurance",
+          "CPF (Cattle protection Fund)",
           "₹${AppConstants().formatIndianAmount(insuranceAmount)}",
         ),
 
@@ -268,9 +269,7 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  // ===============================================================
-  // UNIT SELECTOR
-  // ===============================================================
+  
   Widget _unitSelector(WidgetRef ref, String id, int units) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -308,9 +307,7 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  // ===============================================================
-  // INSURANCE SELECTOR
-  // ===============================================================
+  
   Widget _insuranceSelector(
     BuildContext context,
     WidgetRef ref,
@@ -329,14 +326,14 @@ class CartScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Insurance Selection",
+            "CPF Selection",
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
           ),
 
           const SizedBox(height: 8),
 
-          Text("Max Insurance: $units units"),
-          Text("Insurance per unit: ₹${buff.insurance}"),
+          Text("Max CPF: $units units"),
+          Text("CPF per unit: ₹${buff.insurance}"),
 
           const SizedBox(height: 12),
 
@@ -344,7 +341,7 @@ class CartScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                "Insurance Units",
+                "CPF Units",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
 
@@ -416,65 +413,107 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  // ===============================================================
-  // CHECKOUT BUTTON
-  // ===============================================================
-  Widget _checkoutButton(
-    BuildContext context,
-    WidgetRef ref,
-    List<Buffalo> buffList,
-    Map<String, CartItem> cartMap,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      child: SizedBox(
-        height: 55,
-        child: ElevatedButton(
-          onPressed: () {
-            final cartNotifier = ref.read(cartProvider.notifier);
+Widget _checkoutButton(
+  BuildContext context,
+  WidgetRef ref,
+  List<Buffalo> buffList,
+  Map<String, CartItem> cartMap,
+) {
+  int totalAmount = 0;
+  for (Buffalo b in buffList) {
+    final c = cartMap[b.id]!;
+    totalAmount +=
+        (b.price * (c.qty * 2)) + (c.insuranceUnits * b.insurance);
+  }
 
-            final razorpay = RazorPayService(
-              onPaymentSuccess: () async {
-                await cartNotifier.clearCart();
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => BookingSuccessScreen()),
-                );
-              },
-              onPaymentFailed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Payment failed, try again")),
-                );
-              },
-            );
+  return Container(
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 55,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              final cartNotifier = ref.read(cartProvider.notifier);
 
-            int totalAmount = 0;
-            for (Buffalo b in buffList) {
-              final c = cartMap[b.id]!;
-              totalAmount +=
-                  (b.price * (c.qty * 2)) + (c.insuranceUnits * b.insurance);
-            }
+              final razorpay = RazorPayService(
+                onPaymentSuccess: () async {
+                  await cartNotifier.clearCart();
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (_) => BookingSuccessScreen()),
+                  );
+                },
+                onPaymentFailed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Payment failed, try again")),
+                  );
+                },
+              );
 
-            razorpay.openPayment(amount: totalAmount);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: kPrimaryGreen,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(40),
+              razorpay.openPayment(amount: totalAmount);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: kPrimaryGreen,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
             ),
-          ),
-          child: const Text(
-            "Proceed to Payment",
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
+            child: const Text(
+              "Online Payment",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ),
-      ),
-    );
-  }
+
+        const SizedBox(height: 12),
+
+       
+        SizedBox(
+          height: 55,
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () async {
+              final cartNotifier = ref.read(cartProvider.notifier);
+              await cartNotifier.clearCart();
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ManualPaymentScreen(
+                    totalAmount: totalAmount,  
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.amber,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(40),
+              ),
+            ),
+            child: const Text(
+              "Manual Payment",
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
 }
 
 // ===============================================================
@@ -555,12 +594,12 @@ Widget _priceExplanation(Buffalo buff, int units, int insuranceUnits) {
         ),
 
         _calcLine(
-          "Insurance Per Buffalo",
+          "CPF Per Buffalo",
           "₹${AppConstants().formatIndianAmount(insurancePerUnit)}",
         ),
-        _calcLine("Insurance Units Chosen", "$insuranceUnits units"),
+        _calcLine("CPF Units Chosen", "$insuranceUnits units"),
         _calcLine(
-          "Total Insurance Cost",
+          "Total CPF Cost",
           "₹${AppConstants().formatIndianAmount(totalInsurance)}",
         ),
 

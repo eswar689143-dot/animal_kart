@@ -2,6 +2,7 @@ import 'package:animal_kart_demo2/controllers/cart_provider.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/buffalo_list_screen.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/cart_screen.dart';
+import 'package:animal_kart_demo2/screens/tabs_screens/orders_screen.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/user_profile_screen.dart';
 import 'package:animal_kart_demo2/screens/tabs_screens/wishlist_screen.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
@@ -27,8 +28,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     _pages = const [
       BuffaloListScreen(),
-      WishlistScreen(),
-      CartScreen(showAppBar: false), // <- AppBar handled inside CartScreen
+      CartScreen(showAppBar: false), 
+      OrdersScreen(),
       UserProfileScreen(),
     ];
   }
@@ -140,13 +141,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(index: 0, icon: Icons.home_rounded, label: "Home"),
-
-              // _navItem(index: 1, icon: Icons.favorite_border, label: "Saved"),
               Stack(
                 clipBehavior: Clip.none,
                 children: [
                   _navItem(
-                    index: 2,
+                    index: 1,
                     icon: Icons.shopping_bag_outlined,
                     label: "My Cart",
                   ),
@@ -172,6 +171,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                 ],
               ),
+                _navItem(index: 2, icon: Icons.shopping_cart, label: "Orders"),
 
               _navItem(index: 3, icon: Icons.person_outline, label: "Profile"),
             ],
