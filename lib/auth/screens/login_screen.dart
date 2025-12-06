@@ -1,11 +1,6 @@
-import 'dart:math';
-
-import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
-import 'package:animal_kart_demo2/auth/screens/otp_screen.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:animal_kart_demo2/widgets/floating_toast.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -18,8 +13,13 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final phoneController = TextEditingController();
+
   bool isButtonEnabled = false;
   bool _isSendingOtp = false;
+
+  // ✅ STATIC VALUES
+  final String staticPhone = "6305625580";
+  final String staticOtp = "123456";
 
   // ---------------- VALIDATION ----------------
   bool isValidPhone(String value) {
@@ -41,8 +41,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider);
-
     return Scaffold(
       backgroundColor: Colors.grey[100],
       body: SafeArea(
@@ -53,28 +51,28 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 40),
-          
+
                 // ---------------- HEADER ----------------
-                Center(
-                  child: const Text(
+                const Center(
+                  child: Text(
                     "Back to the Buffalo Cart\nworld!",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
                   ),
                 ),
-          
+
                 const SizedBox(height: 12),
-          
-                Center(
-                  child: const Text(
+
+                const Center(
+                  child: Text(
                     "Enter your mobile number to continue",
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                 ),
-          
+
                 const SizedBox(height: 40),
-          
+
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -86,9 +84,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                   ),
                 ),
-          
+
                 const SizedBox(height: 10),
-          
+
                 // ---------------- PHONE INPUT ----------------
                 Container(
                   height: 60,
@@ -100,8 +98,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   child: Row(
                     children: [
                       const SizedBox(width: 12),
-          
-                      // Country Code Selector
+
                       InkWell(
                         onTap: () {},
                         child: Row(
@@ -118,39 +115,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ],
                         ),
                       ),
-          
-                      // Divider
+
                       Container(
                         height: 40,
                         width: 1,
                         color: Colors.grey.shade500,
                         margin: const EdgeInsets.symmetric(horizontal: 12),
                       ),
-          
-                      // Phone Input
+
                       Expanded(
                         child: TextField(
                           controller: phoneController,
                           keyboardType: TextInputType.phone,
-          
                           maxLength: 10,
                           onChanged: (_) => validatePhone(),
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             border: InputBorder.none,
-          
                             counterText: "",
                             hintText: "Enter number",
                           ),
                         ),
-                      ),        
+                      ),
                     ],
                   ),
                 ),
 
-              const SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              // ---------------- INFO TEXT ----------------
- Row(
+                // ---------------- INFO TEXT ----------------
+                Row(
                   children: [
                     Icon(
                       Icons.info_rounded,
@@ -159,135 +152,91 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      "We'll send a 6-digit code.",
+                      "Static OTP: 123456",
                       style: TextStyle(color: Colors.grey.shade600),
                     ),
                   ],
                 ),
-          
+
                 const SizedBox(height: 40),
-          
-                /// Generate OTP Button
-SizedBox(
-  width: double.infinity,
-  height: 60,
-  child: ElevatedButton(
-    onPressed: isButtonEnabled && !_isSendingOtp
-        ? () async {
-            setState(() {
-                            _isSendingOtp = true;
-            });
-            try {
-              final bool isUserVerfiyed = await ref
-                  .read(authProvider.notifier)
-                  .verifyUser(phoneController.text.trim());
-              if (isUserVerfiyed) {
-                await FirebaseAuth.instance.verifyPhoneNumber(
-                                phoneNumber:
-                                    "+91${phoneController.text.trim()}",
-                  verificationCompleted:
-                      (PhoneAuthCredential credential) async {
-                                      // Auto-sign in for instant verification (rare)
-                                      try {
-                    await FirebaseAuth.instance
-                        .signInWithCredential(credential);
 
-                    if (mounted) {
-                      Navigator.pushReplacementNamed(
-                        context,
-                        AppRoutes.home,
-                                          );
-                                        }
-                                      } catch (e) {
-                                        FloatingToast.showSimpleToast(
-                                          'Auto verification failed',
-                      );
-                    }
-                  },
-                  verificationFailed: (FirebaseAuthException ex) {
-                                  print(
-                                    'Verification failed: ${ex.code} - ${ex.message}',
-                                  );
-                    FloatingToast.showSimpleToast(
-                      'OTP send failed. Please try again.',
-                    );
-                  },
-                  codeSent:
-                      (String verificationId, int? resendToken) {
-                                      print(
-                                        'OTP sent successfully to +91${phoneController.text.trim()}',
-                                      );
-                    FloatingToast.showSimpleToast(
-                      'OTP sent successfully!',
-                    );
-                    Navigator.pushNamed(
-                      context,
-                      AppRoutes.otp,
-                      arguments: {
-                        'verificationId': verificationId,
-                                          'phoneNumber': phoneController.text
-                                              .trim(),
-                      },
-                    );
-                  },
-                                codeAutoRetrievalTimeout: (String verificationId) {
-                                  print(
-                                    'Auto retrieval timeout for verification: $verificationId',
-                                  );
-                                },
-                  timeout: const Duration(seconds: 60),
-                );
-              } else {
-                FloatingToast.showSimpleToast(
-                  "User not found ,Not a new referral",
-                );
-              }
-            } finally {
-              if (mounted) {
-                setState(() {
-                                _isSendingOtp = false;
-                });
-              }
-            }
-          }
-        : null,
-    style: ElevatedButton.styleFrom(
-      backgroundColor: isButtonEnabled
-          ? const Color(0xFF57BE82)
-                        : const Color.fromARGB(255, 186, 236, 209),
-                    disabledBackgroundColor: const Color(
-                      0xFFBAECD1,
-                    ), // your disabled color
-                    disabledForegroundColor: Colors.grey.shade700,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(40),
-      ),
-    ),
+                // ✅ STATIC LOGIN BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: isButtonEnabled && !_isSendingOtp
+                        ? () async {
+                            setState(() => _isSendingOtp = true);
 
-    child: _isSendingOtp
-        ? const SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              const Color(0xFF57BE82),
+                            await Future.delayed(const Duration(seconds: 1));
+
+                            final enteredPhone =
+                                phoneController.text.trim();
+
+                            // ✅ PHONE VALIDATION
+                            if (enteredPhone != staticPhone) {
+                              FloatingToast.showSimpleToast(
+                                  "Invalid mobile number");
+                              setState(() => _isSendingOtp = false);
+                              return;
+                            }
+
+                            FloatingToast.showSimpleToast(
+                                "OTP is $staticOtp");
+
+                            if (!mounted) return;
+
+                            // ✅ PASS PHONE TO OTP SCREEN
+                            Navigator.pushNamed(
+                              context,
+                              AppRoutes.otp,
+                              arguments: {
+                                'phoneNumber': enteredPhone,
+                                'staticOtp': staticOtp,
+                              },
+                            );
+
+                            setState(() => _isSendingOtp = false);
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isButtonEnabled
+                          ? const Color(0xFF57BE82)
+                          : const Color.fromARGB(255, 186, 236, 209),
+                      disabledBackgroundColor:
+                          const Color(0xFFBAECD1),
+                      disabledForegroundColor:
+                          Colors.grey.shade700,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(40),
+                      ),
+                    ),
+                    child: _isSendingOtp
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(
+                                Color(0xFF57BE82),
+                              ),
                             ),
-            ),
-          )
-                      : Text(
-            "Send OTP",
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-                            color: isButtonEnabled
-                                ? Colors.black
-                                : Colors.grey.shade500,
-            ),
-          ),
-  ),
-),
- ],
+                          )
+                        : Text(
+                            "Send OTP",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: isButtonEnabled
+                                  ? Colors.black
+                                  : Colors.grey.shade500,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

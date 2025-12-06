@@ -6,7 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../auth/providers/user_provider.dart';
+import '../providers/user_provider.dart';
 
 class AadhaarUploadWidget extends ConsumerWidget {
   final File? file;

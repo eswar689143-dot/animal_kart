@@ -2,8 +2,8 @@ import 'package:animal_kart_demo2/auth/screens/login_screen.dart';
 import 'package:animal_kart_demo2/auth/screens/otp_screen.dart';
 import 'package:animal_kart_demo2/auth/screens/register_form.dart';
 import 'package:animal_kart_demo2/screens/home_screen.dart';
-import 'package:animal_kart_demo2/screens/onboarding/onboarding_screen.dart';
-import 'package:animal_kart_demo2/screens/onboarding/splash_screen.dart';
+import 'package:animal_kart_demo2/onboarding/screens/onboarding_screen.dart';
+import 'package:animal_kart_demo2/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -28,26 +28,19 @@ class AppRoutes {
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case otp:
-        // if (verificationId == null || verificationId.isEmpty) {
-        //   return _errorRoute('Missing verificationId for OTP screen');
-        // }
-        return MaterialPageRoute(builder: (_) => const HomeScreen());
-        // return MaterialPageRoute(
-        //   builder: (_) => OtpScreen(
-        //     verficationId: verificationId,
-        //     phoneNumber: phoneNumber,
-        //   ),
-        // );
+        return MaterialPageRoute(
+          builder: (_) => OtpScreen(
+            phoneNumber: phoneNumber, 
+          ),
+        );
+        
       case profileForm:
         return MaterialPageRoute(
           builder: (_) => RegisterScreen(phoneNumberFromLogin: phoneNumber),
         );
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
-      // case addBuffalocart:
-      //     return MaterialPageRoute(
-      //       builder: (_) => const BuffaloCartScreen(),
-      //     );
+     
 
       default:
         return _errorRoute('No route defined for ${settings.name}');

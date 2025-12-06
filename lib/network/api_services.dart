@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:animal_kart_demo2/auth/models/addbuffalo_model.dart';
 import 'package:animal_kart_demo2/auth/models/device_details.dart';
 import 'package:animal_kart_demo2/auth/models/removeCart_model.dart';
-import 'package:animal_kart_demo2/models/buffalo.dart';
+import 'package:animal_kart_demo2/buffalo/models/buffalo.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;

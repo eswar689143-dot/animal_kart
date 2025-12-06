@@ -1,6 +1,6 @@
-import 'package:animal_kart_demo2/controllers/buffalo_provider.dart';
-import 'package:animal_kart_demo2/controllers/cart_provider.dart';
-import 'package:animal_kart_demo2/screens/services/razorpay_service.dart';
+import 'package:animal_kart_demo2/buffalo/providers/buffalo_provider.dart';
+import 'package:animal_kart_demo2/cart/providers/cart_provider.dart';
+import 'package:animal_kart_demo2/utils/razorpay_service.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
@@ -11,7 +11,7 @@ import 'package:animal_kart_demo2/widgets/payment_widgets/successful_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
-import '../../models/buffalo.dart';
+import '../../buffalo/models/buffalo.dart';
 
 class CartScreen extends ConsumerWidget {
   final bool showAppBar;
@@ -355,85 +355,84 @@ class CartScreen extends ConsumerWidget {
                 "CPF Units",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
-Row(
-  children: [
-    /// ➖ DECREASE BUTTON
-    GestureDetector(
-      onTap: insuranceUnits > 0
-          ? () => ref
-              .read(cartProvider.notifier)
-              .decreaseInsurance(buff.id)
-          : null, // ✅ disabled at 0
-      child: _circleButton(
-        Icons.remove,
-        isDisabled: insuranceUnits == 0,
-      ),
-    ),
+          Row(
+            children: [
+              /// ➖ DECREASE BUTTON
+              GestureDetector(
+                onTap: insuranceUnits > 0
+                    ? () => ref
+                        .read(cartProvider.notifier)
+                        .decreaseInsurance(buff.id)
+                    : null, // ✅ disabled at 0
+                child: _circleButton(
+                  Icons.remove,
+                  isDisabled: insuranceUnits == 0,
+                ),
+              ),
 
-    const SizedBox(width: 18),
+              const SizedBox(width: 18),
 
-    /// VALUE
-    Text(
-      "$insuranceUnits",
-      style: const TextStyle(
-        fontSize: 17,
-        fontWeight: FontWeight.w700,
-      ),
-    ),
+              /// VALUE
+              Text(
+                "$insuranceUnits",
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
 
-    const SizedBox(width: 18),
+              const SizedBox(width: 18),
 
-    /// ➕ INCREASE BUTTON
-    GestureDetector(
-      onTap: insuranceUnits == 0
-          ? () => ref
-              .read(cartProvider.notifier)
-              .increaseInsurance(buff.id)
-          : null, // ✅ disabled when value is 1+
-      child: _circleButton(
-        Icons.add,
-        isDisabled: insuranceUnits != 0,
-      ),
-    ),
-  ],
-),
-
-              // Row(
-              //   children: [
-              //     GestureDetector(
-              //       onTap: () => ref
-              //           .read(cartProvider.notifier)
-              //           .decreaseInsurance(buff.id),
-              //       child: _circleButton(Icons.remove),
-              //     ),
-              //     const SizedBox(width: 18),
-
-              //     Text(
-              //       "$insuranceUnits",
-              //       style: const TextStyle(
-              //         fontSize: 17,
-              //         fontWeight: FontWeight.w700,
-              //       ),
-              //     ),
-
-              //     const SizedBox(width: 18),
-
-              //     GestureDetector(
-              //       onTap: () => ref
-              //           .read(cartProvider.notifier)
-              //           .increaseInsurance(buff.id),
-              //       child: _circleButton(Icons.add),
-              //     ),
-              //   ],
-              // ),
+              /// ➕ INCREASE BUTTON
+              GestureDetector(
+                onTap: insuranceUnits == 0
+                    ? () => ref
+                        .read(cartProvider.notifier)
+                        .increaseInsurance(buff.id)
+                    : null, // ✅ disabled when value is 1+
+                child: _circleButton(
+                  Icons.add,
+                  isDisabled: insuranceUnits != 0,
+                ),
+              ),
             ],
           ),
-        ],
-      ),
-    );
-  }
 
-  // Widget _circleButton(IconData icon) {
+                        // Row(
+                        //   children: [
+                        //     GestureDetector(
+                        //       onTap: () => ref
+                        //           .read(cartProvider.notifier)
+                        //           .decreaseInsurance(buff.id),
+                        //       child: _circleButton(Icons.remove),
+                        //     ),
+                        //     const SizedBox(width: 18),
+
+                        //     Text(
+                        //       "$insuranceUnits",
+                        //       style: const TextStyle(
+                        //         fontSize: 17,
+                        //         fontWeight: FontWeight.w700,
+                        //       ),
+                        //     ),
+
+                        //     const SizedBox(width: 18),
+
+                        //     GestureDetector(
+                        //       onTap: () => ref
+                        //           .read(cartProvider.notifier)
+                        //           .increaseInsurance(buff.id),
+                        //       child: _circleButton(Icons.add),
+                        //     ),
+                        //   ],
+                        // ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }
+ // Widget _circleButton(IconData icon) {
   //   return CircleAvatar(
   //     radius: 12,
   //     backgroundColor: akBlackColor,

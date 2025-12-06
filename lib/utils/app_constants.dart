@@ -1,4 +1,4 @@
-import 'package:animal_kart_demo2/models/onboarding_data.dart';
+import 'package:animal_kart_demo2/onboarding/models/onboarding_data.dart';
 import 'package:intl/intl.dart';
 
 const String kRobotoBold = 'RobotoBold';

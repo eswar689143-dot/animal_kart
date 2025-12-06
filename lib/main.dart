@@ -14,7 +14,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'theme/theme_provider.dart';
 import 'theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
-import 'controllers/locale_provider.dart';
+import 'l10n/locale_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

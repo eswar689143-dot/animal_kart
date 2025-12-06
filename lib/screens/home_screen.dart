@@ -1,10 +1,9 @@
-import 'package:animal_kart_demo2/controllers/cart_provider.dart';
+import 'package:animal_kart_demo2/cart/providers/cart_provider.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
-import 'package:animal_kart_demo2/screens/tabs_screens/buffalo_list_screen.dart';
-import 'package:animal_kart_demo2/screens/tabs_screens/cart_screen.dart';
-import 'package:animal_kart_demo2/screens/tabs_screens/orders_screen.dart';
-import 'package:animal_kart_demo2/screens/tabs_screens/user_profile_screen.dart';
-import 'package:animal_kart_demo2/screens/tabs_screens/wishlist_screen.dart';
+import 'package:animal_kart_demo2/buffalo/screens/buffalo_list_screen.dart';
+import 'package:animal_kart_demo2/cart/screens/cart_screen.dart';
+import 'package:animal_kart_demo2/orders/screens/orders_screen.dart';
+import 'package:animal_kart_demo2/profile/screens/user_profile_screen.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
@@ -28,7 +27,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     _pages = const [
       BuffaloListScreen(),
-      CartScreen(showAppBar: false), 
+      // CartScreen(showAppBar: false), 
       OrdersScreen(),
       UserProfileScreen(),
     ];
@@ -40,7 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final cart = ref.watch(cartProvider);
+    // final cart = ref.watch(cartProvider);
     final authState = ref.watch(authProvider);
     final userProfile = authState.userProfile;
 
@@ -141,39 +140,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(index: 0, icon: Icons.home_rounded, label: "Home"),
-              Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  _navItem(
-                    index: 1,
-                    icon: Icons.shopping_bag_outlined,
-                    label: "My Cart",
-                  ),
-                  if (cart.isNotEmpty)
-                    Positioned(
-                      right: -6,
-                      top: -4,
-                      child: Container(
-                        padding: const EdgeInsets.all(5),
-                        decoration: const BoxDecoration(
-                          color: Colors.red,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Text(
-                          cart.length.toString(),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-                _navItem(index: 2, icon: Icons.shopping_cart, label: "Orders"),
+              // Stack(
+              //   clipBehavior: Clip.none,
+              //   children: [
+              //     _navItem(
+              //       index: 1,
+              //       icon: Icons.shopping_bag_outlined,
+              //       label: "My Cart",
+              //     ),
+              //     if (cart.isNotEmpty)
+              //       Positioned(
+              //         right: -6,
+              //         top: -4,
+              //         child: Container(
+              //           padding: const EdgeInsets.all(5),
+              //           decoration: const BoxDecoration(
+              //             color: Colors.red,
+              //             shape: BoxShape.circle,
+              //           ),
+              //           child: Text(
+              //             cart.length.toString(),
+              //             style: const TextStyle(
+              //               fontSize: 11,
+              //               color: Colors.white,
+              //               fontWeight: FontWeight.bold,
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //   ],
+              // ),
+                _navItem(index: 1, icon: Icons.shopping_cart, label: "Orders"),
 
-              _navItem(index: 3, icon: Icons.person_outline, label: "Profile"),
+              _navItem(index: 2, icon: Icons.person_outline, label: "Profile"),
             ],
           ),
         ),
@@ -212,61 +211,5 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // Widget _navItem({
-  //   required int index,
-  //   required IconData icon,
-  //   required String label,
-  // }) {
-  //   final isSelected = _selectedIndex == index;
-
-  //   return GestureDetector(
-  //     onTap: () => _onItemTapped(index),
-  //     child: Column(
-  //       mainAxisSize: MainAxisSize.min,
-  //       children: [
-  //         AnimatedContainer(
-  //           duration: const Duration(milliseconds: 220),
-  //           height: 6,
-  //           width: 6,
-  //           decoration: BoxDecoration(
-  //             color: isSelected ? kPrimaryGreen : Colors.transparent,
-  //             shape: BoxShape.circle,
-  //           ),
-  //         ),
-  //         const SizedBox(height: 6),
-  //         AnimatedContainer(
-  //           duration: const Duration(milliseconds: 220),
-  //           padding: EdgeInsets.symmetric(
-  //             horizontal: isSelected ? 18 : 0,
-  //             vertical: isSelected ? 10 : 0,
-  //           ),
-  //           decoration: BoxDecoration(
-  //             color: isSelected ? kPrimaryGreen : Colors.transparent,
-  //             borderRadius: BorderRadius.circular(30),
-  //           ),
-  //           child: Row(
-  //             children: [
-  //               Icon(
-  //                 icon,
-  //                 size: 26,
-  //                 color: isSelected ? Colors.black : Colors.grey.shade700,
-  //               ),
-  //               if (isSelected) ...[
-  //                 const SizedBox(width: 8),
-  //                 Text(
-  //                   context.tr(label),
-  //                   style: const TextStyle(
-  //                     color: Colors.black,
-  //                     fontSize: 16,
-  //                     fontWeight: FontWeight.w600,
-  //                   ),
-  //                 ),
-  //               ],
-  //             ],
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  
 }

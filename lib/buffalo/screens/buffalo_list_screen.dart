@@ -1,10 +1,10 @@
-import 'package:animal_kart_demo2/controllers/buffalo_provider.dart';
+import 'package:animal_kart_demo2/buffalo/providers/buffalo_provider.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 
-import '../../widgets/buffalo_widgets/buffalo_card.dart';
+import '../widgets/buffalo_card.dart';
 
 class BuffaloListScreen extends ConsumerWidget {
   const BuffaloListScreen({super.key});

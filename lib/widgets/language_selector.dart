@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:animal_kart_demo2/controllers/locale_provider.dart';
+import 'package:animal_kart_demo2/l10n/locale_provider.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 
 class LanguageSelector extends ConsumerWidget {

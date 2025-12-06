@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/widgets/custom_widgets.dart';
-import 'package:animal_kart_demo2/widgets/aadhar_upload_widget.dart';
+import 'package:animal_kart_demo2/auth/widgets/aadhar_upload_widget.dart';
 import 'package:animal_kart_demo2/widgets/floating_toast.dart';
 
 class ManualPaymentScreen extends StatefulWidget {

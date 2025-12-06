@@ -1,13 +1,13 @@
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
-import 'package:animal_kart_demo2/screens/tabs_screens/cart_screen.dart';
+import 'package:animal_kart_demo2/cart/screens/cart_screen.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
-import 'package:animal_kart_demo2/widgets/buffalo_widgets/bufflo_details_screen.dart';
+import 'package:animal_kart_demo2/buffalo/screens/bufflo_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../controllers/cart_provider.dart';
-import '../../models/buffalo.dart';
+import '../../cart/providers/cart_provider.dart';
+import '../models/buffalo.dart';
 
 class BuffaloCard extends ConsumerWidget {
   final Buffalo buffalo;
@@ -52,7 +52,7 @@ final isInCart = cart.containsKey(buffalo.id);
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ===================== IMAGE =====================
+              
               Stack(
                 children: [
                   ClipRRect(
@@ -74,7 +74,7 @@ final isInCart = cart.containsKey(buffalo.id);
                           ),
                   ),
 
-                  // Status Tag: Available / Out of Stock
+                  
                   Positioned(
                     top: 12,
                     right: 12,
@@ -102,8 +102,6 @@ final isInCart = cart.containsKey(buffalo.id);
                   ),
                 ],
               ),
-
-              // ===================== DETAILS =====================
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
@@ -115,7 +113,7 @@ final isInCart = cart.containsKey(buffalo.id);
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Breed + Milk Yield
+                       
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,9 +151,9 @@ final isInCart = cart.containsKey(buffalo.id);
 
                         const SizedBox(width: 12),
 
-                        // Insurance Button
+                        
                         OutlinedButton.icon(
-                          onPressed: () => _showInsuranceInfo(context),
+                          onPressed: () => _showInsuranceInfo(context,buffalo.price,buffalo.insurance),
                           icon: const Icon(
                             Icons.info_outline,
                             size: 18,
@@ -196,7 +194,6 @@ final isInCart = cart.containsKey(buffalo.id);
 
                     const SizedBox(height: 5),
 
-                    // ===================== Price + Add to Cart =====================
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -221,81 +218,44 @@ final isInCart = cart.containsKey(buffalo.id);
                           ],
                         ),
 
-                        // Add to Cart Button
-                        // ✅ Watch cart state for this buffalo
+                       
+                    ElevatedButton(
+                      onPressed: disabled
+                          ? null
+                          : () {
+                              if (!isInCart) {
+                              
+                                ref.read(cartProvider.notifier).setItem(
+                                      buffalo.id,
+                                      1, 
+                                      0, 
+                                    );
+                              } else {
+                                
+                              
+                                Navigator.push(context, MaterialPageRoute(builder: (_) => CartScreen(showAppBar: true,)));
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kPrimaryGreen,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 14,
+                        ),
+                      ),
+                      child: Text(
+                         "View Details",
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
 
-ElevatedButton(
-  onPressed: disabled
-      ? null
-      : () {
-          if (!isInCart) {
-            // ✅ FIRST CLICK → ADD TO CART WITH QTY = 1
-            ref.read(cartProvider.notifier).setItem(
-                  buffalo.id,
-                  1, // qty
-                  0, // insuranceUnits
-                );
-          } else {
-            
-            // ✅ SECOND CLICK → GO TO CART SCREEN
-           // const CartScreen(showAppBar: true);
-           // Navigator.pushNamed(context, "/cart");
-            // OR use your screen directly:
-            Navigator.push(context, MaterialPageRoute(builder: (_) => CartScreen(showAppBar: true,)));
-          }
-        },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: kPrimaryGreen,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30),
-    ),
-    padding: const EdgeInsets.symmetric(
-      horizontal: 28,
-      vertical: 14,
-    ),
-  ),
-  child: Text(
-    isInCart ? "Go to Cart" : "Add to Cart", // ✅ Text switches automatically
-    style: const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-      color: Colors.black,
-    ),
-  ),
-),
-
-                        // ElevatedButton(
-                        //   onPressed: disabled
-                        //       ? null
-                        //       : () {
-                        //           Navigator.push(
-                        //             context,
-                        //             MaterialPageRoute(
-                        //               builder: (_) => BuffaloDetailsScreen(
-                        //                 buffaloId: buffalo.id,
-                        //               ),
-                        //             ),
-                        //           );
-                        //         },
-                        //   style: ElevatedButton.styleFrom(
-                        //     backgroundColor: kPrimaryGreen,
-                        //     shape: RoundedRectangleBorder(
-                        //       borderRadius: BorderRadius.circular(30),
-                        //     ),
-                        //     padding: const EdgeInsets.symmetric(
-                        //       horizontal: 28,
-                        //       vertical: 14,
-                        //     ),
-                        //   ),
-                        //   child: Text(
-                        //     context.tr("Add to Cart"),
-                        //     style: TextStyle(
-                        //       fontSize: 14,
-                        //       fontWeight: FontWeight.w600,
-                        //       color: Colors.black,
-                        //     ),
-                        //   ),
-                        // ),
                       ],
                     ),
                   ],
@@ -309,7 +269,7 @@ ElevatedButton(
   }
 
   // ===================== SHOW INSURANCE MODAL =====================
-  void _showInsuranceInfo(BuildContext context) {
+  void _showInsuranceInfo(BuildContext context,int price,int insurance) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -317,12 +277,12 @@ ElevatedButton(
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
-      builder: (_) => _insuranceSheet(context),
+      builder: (_) => _insuranceSheet(context,price,insurance),
     );
   }
 
   // ===================== INSURANCE SHEET =====================
-  Widget _insuranceSheet(BuildContext context) {
+  Widget _insuranceSheet(BuildContext context,int price,int insurance) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Column(
@@ -401,13 +361,13 @@ ElevatedButton(
 
                 // Row 1
                 Container(
-                  padding: const EdgeInsets.symmetric(
+                  padding:  EdgeInsets.symmetric(
                     horizontal: 18,
                     vertical: 14,
                   ),
-                  color: const Color(0xFF10B981),
+                  color:  Color(0xFF10B981),
                   child: Row(
-                    children: const [
+                    children:  [
                       Expanded(
                         child: Text(
                           "1",
@@ -416,13 +376,13 @@ ElevatedButton(
                       ),
                       Expanded(
                         child: Text(
-                          "₹150,000",
+                          price.toString(),
                           style: TextStyle(fontSize: 14, color: Colors.white),
                         ),
                       ),
                       Expanded(
                         child: Text(
-                          "₹13,000",
+                          insurance.toString(),
                           textAlign: TextAlign.right,
                           style: TextStyle(fontSize: 14, color: Colors.white),
                         ),
@@ -449,7 +409,7 @@ ElevatedButton(
                         child: Text("2", style: TextStyle(fontSize: 14)),
                       ),
                       Expanded(
-                        child: Text("₹150,000", style: TextStyle(fontSize: 14)),
+                        child: Text(price.toString(), style: TextStyle(fontSize: 14)),
                       ),
                       Expanded(
                         child: Text(
@@ -468,10 +428,7 @@ ElevatedButton(
               ],
             ),
           ),
-
           const SizedBox(height: 20),
-
-          // ================= NOTE BOX =================
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -494,5 +451,4 @@ ElevatedButton(
   }
 }
 
-// Header Style Constant
 const _headerStyle = TextStyle(fontSize: 14, fontWeight: FontWeight.w600);
