@@ -5,6 +5,7 @@ import 'package:animal_kart_demo2/screens/tabs_screens/cart_screen.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
+import 'package:animal_kart_demo2/widgets/disable_addbutton_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -21,6 +22,7 @@ class BuffaloDetailsScreen extends ConsumerStatefulWidget {
 class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
   int qty = 1; // qty = units
   int currentIndex = 0;
+bool _isBenefitExpanded = false;
 
   late PageController _pageController;
 
@@ -220,7 +222,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                   child: Row(
                     children: [
                       /// QTY SELECTOR
-                      Expanded(
+                      Flexible(
                         flex: 1,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -234,9 +236,14 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              _qtyButton(Icons.remove, () {
-                                if (qty > 1) setState(() => qty--);
-                              }),
+                              DisabledCircleButton(
+          icon: Icons.remove,
+          radius: 12,
+          iconSize: 20,
+        ),
+                              // _qtyButton(Icons.remove, () {
+                              //   if (qty > 1) setState(() => qty--);
+                              // }),
 
                               Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -250,16 +257,26 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                                   ),
                                 ),
                               ),
+                            CircleAvatar(
+                                radius: 12,
+                                backgroundColor: Colors.grey, // disabled look
+                                child: DisabledCircleButton(
+          icon: Icons.add,
+          radius: 12,
+          iconSize: 20,
+        ),
+                               // child: Icon(Icons.add, size: 20, color: Colors.white),
+                              ),
 
-                              _qtyButton(Icons.add, () {
-                                setState(() => qty++);
-                              }),
+                              // _qtyButton(Icons.add, () {
+                              //   setState(() => qty++);
+                              // }),
                             ],
                           ),
                         ),
                       ),
 
-                      const SizedBox(width: 30),
+                      const SizedBox(width: 12),
 
                       /// BUY BUTTON
                       Expanded(
@@ -340,118 +357,256 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
             ),
           ),
 
-          const SizedBox(height: 22),
+         // const SizedBox(height: 22),
+          commercialBenefitExpandable(),
 
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFFFF7),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Color(0xFF10B981), width: 1),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  blurRadius: 6,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: const [
-                    Icon(
-                      Icons.info_outline,
-                      color: Color(0xFF0F9D58),
-                      size: 22,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      "Commercial Benefit Explanation",
-                      style: TextStyle(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F9D58),
-                      ),
-                    ),
-                  ],
-                ),
+          // Container(
+          //   padding: const EdgeInsets.all(18),
+          //   decoration: BoxDecoration(
+          //     color: const Color(0xFFEFFFF7),
+          //     borderRadius: BorderRadius.circular(16),
+          //     border: Border.all(color: Color(0xFF10B981), width: 1),
+          //     boxShadow: [
+          //       BoxShadow(
+          //         color: Colors.black12,
+          //         blurRadius: 6,
+          //         offset: Offset(0, 3),
+          //       ),
+          //     ],
+          //   ),
+          //   child: Column(
+          //     crossAxisAlignment: CrossAxisAlignment.start,
+          //     children: [
+          //       Row(
+          //         children: const [
+          //           Icon(
+          //             Icons.info_outline,
+          //             color: Color(0xFF0F9D58),
+          //             size: 22,
+          //           ),
+          //           SizedBox(width: 8),
+          //           Text(
+          //             "Commercial Benefit Explanation",
+          //             style: TextStyle(
+          //               fontSize: 17,
+          //               fontWeight: FontWeight.w700,
+          //               color: Color(0xFF0F9D58),
+          //             ),
+          //           ),
+          //         ],
+          //       ),
 
-                const SizedBox(height: 14),
+          //       const SizedBox(height: 14),
 
-                const Text(
-                  "Understanding the Unit System:",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  "• 1 Unit = 2 buffaloes.\n"
-                  "• You can choose how many units you want to buy.\n"
-                  "• Insurance is charged per buffalo: ₹13,000 each.\n",
-                  style: TextStyle(fontSize: 14.5, height: 1.45),
-                ),
+          //       const Text(
+          //         "Understanding the Unit System:",
+          //         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          //       ),
+          //       const SizedBox(height: 6),
+          //       const Text(
+          //         "• 1 Unit = 2 buffaloes.\n"
+          //         "• You can choose how many units you want to buy.\n"
+          //         "• Insurance is charged per buffalo: ₹13,000 each.\n",
+          //         style: TextStyle(fontSize: 14.5, height: 1.45),
+          //       ),
 
-                const SizedBox(height: 14),
+          //       const SizedBox(height: 14),
 
-                const Text(
-                  "Free CPF Offer:",
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  "• For every 1 Unit (2 buffaloes), you get insurance for 1 buffalo absolutely FREE.\n"
-                  "• Free insurance increases as you buy more units.",
-                  style: TextStyle(fontSize: 14.5, height: 1.45),
-                ),
+          //       const Text(
+          //         "Free CPF Offer:",
+          //         style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          //       ),
+          //       const SizedBox(height: 6),
+          //       const Text(
+          //         "• For every 1 Unit (2 buffaloes), you get insurance for 1 buffalo absolutely FREE.\n"
+          //         "• Free insurance increases as you buy more units.",
+          //         style: TextStyle(fontSize: 14.5, height: 1.45),
+          //       ),
 
-                const SizedBox(height: 14),
+          //       const SizedBox(height: 14),
 
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFECFDF5),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Example Benefits:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          color: Color(0xFF0F9D58),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      Text(
-                        "• Buy 1 Unit (2 buffaloes) → 1  CPF FREE\n"
-                        "• Buy 2 Units (4 buffaloes) → 2 CPF FREE\n"
-                        "• Buy 4 Units (8 buffaloes) → 4 CPF FREE",
-                        style: TextStyle(fontSize: 14.5, height: 1.45),
-                      ),
-                    ],
-                  ),
-                ),
+          //       Container(
+          //         padding: const EdgeInsets.all(14),
+          //         decoration: BoxDecoration(
+          //           color: Color(0xFFECFDF5),
+          //           borderRadius: BorderRadius.circular(12),
+          //         ),
+          //         child: const Column(
+          //           crossAxisAlignment: CrossAxisAlignment.start,
+          //           children: [
+          //             Text(
+          //               "Example Benefits:",
+          //               style: TextStyle(
+          //                 fontWeight: FontWeight.w700,
+          //                 fontSize: 15,
+          //                 color: Color(0xFF0F9D58),
+          //               ),
+          //             ),
+          //             SizedBox(height: 8),
+          //             Text(
+          //               "• Buy 1 Unit (2 buffaloes) → 1  CPF FREE\n"
+          //               "• Buy 2 Units (4 buffaloes) → 2 CPF FREE\n"
+          //               "• Buy 4 Units (8 buffaloes) → 4 CPF FREE",
+          //               style: TextStyle(fontSize: 14.5, height: 1.45),
+          //             ),
+          //           ],
+          //         ),
+          //       ),
 
-                const SizedBox(height: 16),
+          //       const SizedBox(height: 16),
 
-                const Text(
-                  "This offer significantly reduces your total insurance cost as you buy more units.",
-                  style: TextStyle(
-                    fontSize: 14.5,
-                    fontStyle: FontStyle.italic,
-                    height: 1.4,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          //       const Text(
+          //         "This offer significantly reduces your total insurance cost as you buy more units.",
+          //         style: TextStyle(
+          //           fontSize: 14.5,
+          //           fontStyle: FontStyle.italic,
+          //           height: 1.4,
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );
   }
+        Widget commercialBenefitExpandable() {
+          return GestureDetector(
+            onTap: () {
+              setState(() => _isBenefitExpanded = !_isBenefitExpanded);
+            },
+            child: Container(
+              margin: const EdgeInsets.only(top: 22),
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: const Color(0xFFEFFFF7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: Color(0xFF10B981), width: 1),
+                      boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline,
+                          color: Color(0xFF0F9D58), size: 22),
+
+                      const SizedBox(width: 8),
+
+                      const Expanded(
+                        child: Text(
+                          "Commercial Benefit Explanation",
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF0F9D58),
+                          ),
+                        ),
+                      ),
+
+                      AnimatedRotation(
+                        turns: _isBenefitExpanded ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 300),
+                        child: const Icon(Icons.keyboard_arrow_down,
+                            color: Color(0xFF0F9D58)),
+                      )
+                    ],
+                  ),
+
+                  /// ✅ EXPAND CONTENT
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 320),
+                    curve: Curves.easeInOut,
+                    child: _isBenefitExpanded
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 14),
+
+                              const Text(
+                                "Understanding the Unit System:",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                "• 1 Unit = 2 buffaloes.\n"
+                                "• You can choose how many units you want to buy.\n"
+                                "• Insurance is charged per buffalo: ₹13,000 each.\n",
+                                style: TextStyle(fontSize: 14.5, height: 1.45),
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              const Text(
+                                "Free CPF Offer:",
+                                style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w600),
+                              ),
+                              const SizedBox(height: 6),
+                              const Text(
+                                "• For every 1 Unit (2 buffaloes), you get insurance for 1 buffalo absolutely FREE.\n"
+                                "• Free insurance increases as you buy more units.",
+                                style: TextStyle(fontSize: 14.5, height: 1.45),
+                              ),
+
+                              const SizedBox(height: 14),
+
+                              Container(
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFECFDF5),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Example Benefits:",
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 15,
+                                        color: Color(0xFF0F9D58),
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                "• Buy 1 Unit (2 buffaloes) → 1  CPF FREE\n"
+                                      "• Buy 2 Units (4 buffaloes) → 2 CPF FREE\n"
+                                      "• Buy 4 Units (8 buffaloes) → 4 CPF FREE",
+                                      style:
+                                          TextStyle(fontSize: 14.5, height: 1.45),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              const Text(
+                                "This offer significantly reduces your total insurance cost as you buy more units.",
+                                style: TextStyle(
+                                  fontSize: 14.5,
+                                  fontStyle: FontStyle.italic,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const SizedBox(),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
 
   Widget _headerRow() {
     return Container(

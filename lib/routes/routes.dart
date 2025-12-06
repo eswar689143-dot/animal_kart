@@ -13,6 +13,8 @@ class AppRoutes {
   static const String otp = '/otp';
   static const String profileForm = '/profile-form';
   static const String home = '/home';
+  //static const String addBuffalocart = '/cart';
+
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments as Map<String, dynamic>?;
@@ -26,21 +28,26 @@ class AppRoutes {
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case otp:
-        if (verificationId == null || verificationId.isEmpty) {
-          return _errorRoute('Missing verificationId for OTP screen');
-        }
-        return MaterialPageRoute(
-          builder: (_) => OtpScreen(
-            verficationId: verificationId,
-            phoneNumber: phoneNumber,
-          ),
-        );
+        // if (verificationId == null || verificationId.isEmpty) {
+        //   return _errorRoute('Missing verificationId for OTP screen');
+        // }
+        return MaterialPageRoute(builder: (_) => const HomeScreen());
+        // return MaterialPageRoute(
+        //   builder: (_) => OtpScreen(
+        //     verficationId: verificationId,
+        //     phoneNumber: phoneNumber,
+        //   ),
+        // );
       case profileForm:
         return MaterialPageRoute(
           builder: (_) => RegisterScreen(phoneNumberFromLogin: phoneNumber),
         );
       case home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+      // case addBuffalocart:
+      //     return MaterialPageRoute(
+      //       builder: (_) => const BuffaloCartScreen(),
+      //     );
 
       default:
         return _errorRoute('No route defined for ${settings.name}');

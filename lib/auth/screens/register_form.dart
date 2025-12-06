@@ -4,11 +4,13 @@ import 'package:animal_kart_demo2/auth/providers/user_provider.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
+import 'package:animal_kart_demo2/widgets/aadharvalidation_widget.dart';
 import 'package:animal_kart_demo2/widgets/custom_widgets.dart';
 import 'package:animal_kart_demo2/widgets/floating_toast.dart';
 import 'package:animal_kart_demo2/widgets/aadhar_upload_widget.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,6 +40,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Map<String, String> aadhaarUrls = {};
 
   String gender = "Male";
+  DateTime? selectedDOB;
+
+///age calculation
+int calculateAge(DateTime birthDate) {
+  final today = DateTime.now();
+  int age = today.year - birthDate.year;
+
+  if (today.month < birthDate.month ||
+      (today.month == birthDate.month && today.day < birthDate.day)) {
+    age--;
+  }
+  return age;
+}
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -268,18 +286,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
 
                       const SizedBox(height: 20),
-                      const Text(
-                        "Aadhaar Verfication (Optional)",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
+                      // const Text(
+                      //   "Aadhaar Verfication (Optional)",
+                      //   style: TextStyle(
+                      //     fontSize: 16,
+                      //     fontWeight: FontWeight.w400,
+                      //   ),
+                      // ),
+                       const SizedBox(height: 8),
                       TextFormField(
-                        controller: aadhaarCtrl,
-                        decoration: fieldDeco("Aadhaar Number (Optional)"),
-                      ),
+                      controller: aadhaarCtrl,
+                      decoration: fieldDeco("Aadhaar Number (Optional)"),
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly, // 👈 ALLOWS ONLY NUMBERS
+                     ],
+                      maxLength: 12,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return null; // optional
+
+                        if (!AadharValidator.validateAadhar(value)) {
+                          return "Enter a valid Aadhaar number";
+                        }
+                        return null;
+                      },
+                    ),
+                      // TextFormField(
+                      //   controller: aadhaarCtrl,
+                      //   decoration: fieldDeco("Aadhaar Number (Optional)"),
+                      // ),
 
                       const SizedBox(height: 25),
 
@@ -485,7 +520,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     final picked = await showDatePicker(
       context: context,
-      initialDate: DateTime(now.year - 20),
+      initialDate: DateTime(now.year - 21),
       firstDate: DateTime(1960),
       lastDate: now,
       builder: (context, child) {
@@ -504,13 +539,32 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
 
     if (picked != null) {
+      selectedDOB = picked;
       dobCtrl.text = "${picked.month}-${picked.day}-${picked.year}";
     }
   }
 
   // SUBMIT FORM ------
-  void submitForm() async {
+   void submitForm() async {
     if (!_formKey.currentState!.validate()) return;
+       if (selectedDOB == null) 
+         { FloatingToast.showSimpleToast("Please select your Date of Birth"); return; } 
+            int age = calculateAge(selectedDOB!); 
+              //if(age <=20){
+    if (age < 21) { 
+               FloatingToast.showSimpleToast("You must be at least 21 years old to register");
+       return;
+       }
+  // AADHAAR VALIDATION in submit
+       if (aadhaarCtrl.text.trim().isNotEmpty) {
+         bool isValid = AadharValidator.validateAadhar(aadhaarCtrl.text.trim());
+
+            if (!isValid) {
+              FloatingToast.showSimpleToast("Invalid Aadhaar number");
+        return;
+      }
+   }
+
 
     final auth = ref.read(authProvider.notifier);
     final userId =

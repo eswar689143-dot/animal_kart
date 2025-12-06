@@ -5,6 +5,7 @@ import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:animal_kart_demo2/utils/svg_utils.dart';
+import 'package:animal_kart_demo2/widgets/disable_addbutton_widget.dart';
 import 'package:animal_kart_demo2/widgets/payment_widgets/manual_payment_screen.dart';
 import 'package:animal_kart_demo2/widgets/payment_widgets/successful_screen.dart';
 import 'package:flutter/material.dart';
@@ -282,7 +283,12 @@ class CartScreen extends ConsumerWidget {
         children: [
           GestureDetector(
             onTap: () => ref.read(cartProvider.notifier).decreaseUnits(id),
-            child: _circleButtonSmall(Icons.remove),
+            child: DisabledCircleButton(
+          icon: Icons.remove,
+          radius: 12,
+          iconSize: 20,
+        ),
+           // child: _circleButtonSmall(Icons.remove),
           ),
           const SizedBox(width: 12),
           Text(
@@ -291,21 +297,26 @@ class CartScreen extends ConsumerWidget {
           ),
           const SizedBox(width: 12),
           GestureDetector(
-            onTap: () => ref.read(cartProvider.notifier).increaseUnits(id),
-            child: _circleButtonSmall(Icons.add),
-          ),
+  onTap: null, // disables tap completely
+  child: DisabledCircleButton(icon: Icons.add),
+),
+
+          // GestureDetector(
+          //   onTap: () => ref.read(cartProvider.notifier).increaseUnits(id),
+          //   child: _circleButtonSmall(Icons.add),
+          // ),
         ],
       ),
     );
   }
 
-  Widget _circleButtonSmall(IconData icon) {
-    return CircleAvatar(
-      radius: 11,
-      backgroundColor: akBlackColor,
-      child: Icon(icon, size: 16, color: Colors.white),
-    );
-  }
+  // Widget _circleButtonSmall(IconData icon) {
+  //   return CircleAvatar(
+  //     radius: 11,
+  //     backgroundColor: akBlackColor,
+  //     child: Icon(icon, size: 16, color: Colors.white),
+  //   );
+  // }
 
   
   Widget _insuranceSelector(
@@ -344,35 +355,77 @@ class CartScreen extends ConsumerWidget {
                 "CPF Units",
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
+Row(
+  children: [
+    /// ➖ DECREASE BUTTON
+    GestureDetector(
+      onTap: insuranceUnits > 0
+          ? () => ref
+              .read(cartProvider.notifier)
+              .decreaseInsurance(buff.id)
+          : null, // ✅ disabled at 0
+      child: _circleButton(
+        Icons.remove,
+        isDisabled: insuranceUnits == 0,
+      ),
+    ),
 
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => ref
-                        .read(cartProvider.notifier)
-                        .decreaseInsurance(buff.id),
-                    child: _circleButton(Icons.remove),
-                  ),
-                  const SizedBox(width: 18),
+    const SizedBox(width: 18),
 
-                  Text(
-                    "$insuranceUnits",
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+    /// VALUE
+    Text(
+      "$insuranceUnits",
+      style: const TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w700,
+      ),
+    ),
 
-                  const SizedBox(width: 18),
+    const SizedBox(width: 18),
 
-                  GestureDetector(
-                    onTap: () => ref
-                        .read(cartProvider.notifier)
-                        .increaseInsurance(buff.id),
-                    child: _circleButton(Icons.add),
-                  ),
-                ],
-              ),
+    /// ➕ INCREASE BUTTON
+    GestureDetector(
+      onTap: insuranceUnits == 0
+          ? () => ref
+              .read(cartProvider.notifier)
+              .increaseInsurance(buff.id)
+          : null, // ✅ disabled when value is 1+
+      child: _circleButton(
+        Icons.add,
+        isDisabled: insuranceUnits != 0,
+      ),
+    ),
+  ],
+),
+
+              // Row(
+              //   children: [
+              //     GestureDetector(
+              //       onTap: () => ref
+              //           .read(cartProvider.notifier)
+              //           .decreaseInsurance(buff.id),
+              //       child: _circleButton(Icons.remove),
+              //     ),
+              //     const SizedBox(width: 18),
+
+              //     Text(
+              //       "$insuranceUnits",
+              //       style: const TextStyle(
+              //         fontSize: 17,
+              //         fontWeight: FontWeight.w700,
+              //       ),
+              //     ),
+
+              //     const SizedBox(width: 18),
+
+              //     GestureDetector(
+              //       onTap: () => ref
+              //           .read(cartProvider.notifier)
+              //           .increaseInsurance(buff.id),
+              //       child: _circleButton(Icons.add),
+              //     ),
+              //   ],
+              // ),
             ],
           ),
         ],
@@ -380,13 +433,28 @@ class CartScreen extends ConsumerWidget {
     );
   }
 
-  Widget _circleButton(IconData icon) {
-    return CircleAvatar(
-      radius: 12,
-      backgroundColor: akBlackColor,
-      child: Icon(icon, size: 18, color: Colors.white),
-    );
-  }
+  // Widget _circleButton(IconData icon) {
+  //   return CircleAvatar(
+  //     radius: 12,
+  //     backgroundColor: akBlackColor,
+  //     child: Icon(icon, size: 18, color: Colors.white),
+  //   );
+  // }
+Widget _circleButton(
+  IconData icon, {
+  bool isDisabled = false,
+}) {
+  return CircleAvatar(
+    radius: 12,
+    backgroundColor:
+        isDisabled ? Colors.grey.shade400 : akBlackColor,
+    child: Icon(
+      icon,
+      size: 18,
+      color: isDisabled ? akWhiteColor : Colors.white,
+    ),
+  );
+}
 
   // ===============================================================
   // PRICE ROW

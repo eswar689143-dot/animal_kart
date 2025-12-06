@@ -1,10 +1,12 @@
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
+import 'package:animal_kart_demo2/screens/tabs_screens/cart_screen.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/widgets/buffalo_widgets/bufflo_details_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../controllers/cart_provider.dart';
 import '../../models/buffalo.dart';
 
 class BuffaloCard extends ConsumerWidget {
@@ -15,6 +17,8 @@ class BuffaloCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final disabled = !buffalo.inStock;
+final cart = ref.watch(cartProvider);
+final isInCart = cart.containsKey(buffalo.id);
 
     final String firstImage = buffalo.buffaloImages.first;
     final bool isNetwork = firstImage.startsWith("http");
@@ -218,38 +222,80 @@ class BuffaloCard extends ConsumerWidget {
                         ),
 
                         // Add to Cart Button
-                        ElevatedButton(
-                          onPressed: disabled
-                              ? null
-                              : () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => BuffaloDetailsScreen(
-                                        buffaloId: buffalo.id,
-                                      ),
-                                    ),
-                                  );
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimaryGreen,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 28,
-                              vertical: 14,
-                            ),
-                          ),
-                          child: Text(
-                            context.tr("Add to Cart"),
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
-                          ),
-                        ),
+                        // ✅ Watch cart state for this buffalo
+
+ElevatedButton(
+  onPressed: disabled
+      ? null
+      : () {
+          if (!isInCart) {
+            // ✅ FIRST CLICK → ADD TO CART WITH QTY = 1
+            ref.read(cartProvider.notifier).setItem(
+                  buffalo.id,
+                  1, // qty
+                  0, // insuranceUnits
+                );
+          } else {
+            
+            // ✅ SECOND CLICK → GO TO CART SCREEN
+           // const CartScreen(showAppBar: true);
+           // Navigator.pushNamed(context, "/cart");
+            // OR use your screen directly:
+            Navigator.push(context, MaterialPageRoute(builder: (_) => CartScreen(showAppBar: true,)));
+          }
+        },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: kPrimaryGreen,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30),
+    ),
+    padding: const EdgeInsets.symmetric(
+      horizontal: 28,
+      vertical: 14,
+    ),
+  ),
+  child: Text(
+    isInCart ? "Go to Cart" : "Add to Cart", // ✅ Text switches automatically
+    style: const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+    ),
+  ),
+),
+
+                        // ElevatedButton(
+                        //   onPressed: disabled
+                        //       ? null
+                        //       : () {
+                        //           Navigator.push(
+                        //             context,
+                        //             MaterialPageRoute(
+                        //               builder: (_) => BuffaloDetailsScreen(
+                        //                 buffaloId: buffalo.id,
+                        //               ),
+                        //             ),
+                        //           );
+                        //         },
+                        //   style: ElevatedButton.styleFrom(
+                        //     backgroundColor: kPrimaryGreen,
+                        //     shape: RoundedRectangleBorder(
+                        //       borderRadius: BorderRadius.circular(30),
+                        //     ),
+                        //     padding: const EdgeInsets.symmetric(
+                        //       horizontal: 28,
+                        //       vertical: 14,
+                        //     ),
+                        //   ),
+                        //   child: Text(
+                        //     context.tr("Add to Cart"),
+                        //     style: TextStyle(
+                        //       fontSize: 14,
+                        //       fontWeight: FontWeight.w600,
+                        //       color: Colors.black,
+                        //     ),
+                        //   ),
+                        // ),
                       ],
                     ),
                   ],
