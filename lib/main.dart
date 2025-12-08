@@ -65,7 +65,7 @@ class MyApp extends ConsumerWidget {
         Locale('hi', ''), // Hindi
         Locale('te', ''), // Telugu
       ],
-      initialRoute: AppRouter.onBoardingScreen,
+      initialRoute: AppRouter.splash,
       onGenerateRoute: AppRouter.generateRoute,
       builder: (context, child) {
         // Get the current route
