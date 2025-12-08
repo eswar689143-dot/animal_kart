@@ -1,14 +1,14 @@
-import 'package:animal_kart_demo2/cart/providers/cart_provider.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/buffalo/screens/buffalo_list_screen.dart';
-import 'package:animal_kart_demo2/cart/screens/cart_screen.dart';
 import 'package:animal_kart_demo2/orders/screens/orders_screen.dart';
 import 'package:animal_kart_demo2/profile/screens/user_profile_screen.dart';
+import 'package:animal_kart_demo2/services/notification_service.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -25,6 +25,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
+     _requestNotificationPermission();
+    NotificationService().initNotifications();
+    
     _pages = const [
       BuffaloListScreen(),
       // CartScreen(showAppBar: false), 
@@ -32,6 +35,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       UserProfileScreen(),
     ];
   }
+
+  Future<void> _requestNotificationPermission() async {
+  final status = await Permission.notification.status;
+
+  if (status.isDenied || status.isRestricted) {
+    await Permission.notification.request();
+  }
+}
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
