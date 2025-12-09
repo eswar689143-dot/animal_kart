@@ -1,6 +1,5 @@
 import 'package:animal_kart_demo2/auth/biometric_lock_screen.dart';
 import 'package:animal_kart_demo2/auth/firebase_options.dart';
-import 'package:animal_kart_demo2/services/notification_service.dart';
 import 'package:animal_kart_demo2/theme/theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,7 @@ import 'theme/app_theme.dart' as AppTheme;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // await NotificationService().initialize();
+ 
 
   final prefs = await SharedPreferences.getInstance();
   final isDarkMode = prefs.getBool('isDarkMode') ?? false;

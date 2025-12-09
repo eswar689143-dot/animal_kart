@@ -291,7 +291,7 @@ class BuffaloCard extends ConsumerWidget {
             children: [
               Text(
                 context.tr("CPF (Cattle Protection Fund) Offer"),
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
               ),
               GestureDetector(
                 onTap: () => Navigator.pop(context),

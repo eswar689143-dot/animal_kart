@@ -1,8 +1,4 @@
-// This is a template. You need to generate the actual file using Firebase CLI.
-// Run the following commands in your terminal:
-// 1. flutter pub add firebase_core
-// 2. dart pub global activate flutterfire_cli
-// 3. flutterfire configure
+
 
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'

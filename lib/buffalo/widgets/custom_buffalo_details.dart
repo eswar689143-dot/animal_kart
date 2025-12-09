@@ -104,7 +104,7 @@ Widget cpfExplanationCard(buffalo) {
         ),
 
         cpfPoint(
-          "After 10 years, Expected Revenue: ₹${AppConstants().formatIndianAmount(revenue10Years)}",
+          "After 10 years, Expected Milk Revenue: ₹${AppConstants().formatIndianAmount(revenue10Years)}",
         ),
 
         cpfPoint(
@@ -114,7 +114,7 @@ Widget cpfExplanationCard(buffalo) {
         const Divider(height: 25),
 
         cpfPoint(
-          "If you purchase CPF for ₹${AppConstants().formatIndianAmount(cpf)}, you will receive ✅ 1 additional Buffalo absolutely FREE!",
+          "If you purchase CPF for ₹${AppConstants().formatIndianAmount(cpf)}, you will receive ✅ 1 additional Buffalo CPF absolutely FREE!",
           isHighlight: true,
         ),
       ]),
@@ -149,3 +149,38 @@ Widget cpfPoint(String text, {bool isHighlight = false}) {
     ),
   );
 }
+
+
+Future<void> showCpfConfirmationDialog(BuildContext context, Function onYesPressed) async {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Confirm without CPF"),
+          content: const Text("Are you sure you want to proceed without CPF? This may affect your insurance coverage."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+              },
+              child: const Text(
+                "No",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); 
+                onYesPressed(); // Execute the payment action
+              },
+              child: const Text(
+                "Yes",
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }

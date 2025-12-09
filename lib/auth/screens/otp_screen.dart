@@ -10,8 +10,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   final String phoneNumber;
+  final String otp;
+  final bool isFormFilled;
 
-  const OtpScreen({super.key, required this.phoneNumber});
+  const OtpScreen({super.key, 
+  
+  required this.phoneNumber,
+    required this.otp,
+    required this.isFormFilled,
+  });
 
   @override
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
@@ -108,44 +115,44 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                 width: double.infinity,
                 height: 60,
                 child: ElevatedButton(
-                  onPressed: isOtpValid && !_isVerifying
+                   onPressed: isOtpValid && !_isVerifying
                       ? () async {
                           setState(() => _isVerifying = true);
+
                           final enteredOtp = otpController.text.trim();
-                          final success = await ref
+
+                          // LOCAL OTP VERIFICATION
+                          final isValid = ref
                               .read(authProvider)
-                              .verifyWhatsappOtp(
-                                phone: widget.phoneNumber,
-                                otp: enteredOtp,
-                              );
+                              .verifyWhatsappOtpLocal(enteredOtp);
 
                           if (!mounted) return;
 
-                          if (success) {
+                          if (isValid) {
                             FloatingToast.showSimpleToast(
                               "OTP Verified Successfully",
                             );
-                            final prefs = await SharedPreferences.getInstance();
+
+                            final prefs =
+                                await SharedPreferences.getInstance();
                             await prefs.setBool('isLoggedIn', true);
 
-                            final userProfile = ref
-                                .read(authProvider)
-                                .userProfile;
-
-                            if (!mounted) return;
-
-                            if (userProfile == null) {
+                            // FORM FILLED → HOME
+                            if (widget.isFormFilled == true) {
+                              Navigator.pushReplacementNamed(
+                                context,
+                                AppRouter.home,
+                              );
+                            }
+                            // FORM NOT FILLED → PROFILE FORM
+                            else {
                               Navigator.pushReplacementNamed(
                                 context,
                                 AppRouter.profileForm,
                                 arguments: {
-                                  'phoneNumberFromLogin': widget.phoneNumber,
+                                  'phoneNumberFromLogin':
+                                      widget.phoneNumber,
                                 },
-                              );
-                            } else {
-                              Navigator.pushReplacementNamed(
-                                context,
-                                AppRouter.home,
                               );
                             }
                           } else {
@@ -155,7 +162,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           setState(() => _isVerifying = false);
                         }
                       : null,
-
                   style: ElevatedButton.styleFrom(
                     backgroundColor: isOtpValid
                         ? const Color(0xFF57BE82)

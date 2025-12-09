@@ -23,6 +23,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
   int units = 1;
   int insuranceUnits = 0;
   int currentIndex = 0;
+  bool isCpfSelected = true;
 
   late PageController _pageController;
 
@@ -61,8 +62,9 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
       error: (err, _) => Scaffold(body: Center(child: Text("Error: $err"))),
       data: (buffalo) {
         final buffaloCount = units * 2;
+        final cpfCount = 1;
         final buffaloPrice = buffaloCount * buffalo.price;
-        final cpfAmount = insuranceUnits * buffalo.insurance;
+        final cpfAmount = isCpfSelected ? cpfCount * buffalo.insurance : 0;
         final totalAmount = buffaloPrice + cpfAmount;
 
         return Scaffold(
@@ -96,7 +98,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                 cpfExplanationCard(buffalo),
               
                 const SizedBox(height: 24),
-                _insuranceSelector(buffalo),
+                _cpfCheckboxAndSelector(buffalo),
                 const SizedBox(height: 28),
                 priceExplanation(
                   buffalo:buffalo,
@@ -142,7 +144,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
 
 
   
-  Widget _insuranceSelector(buffalo) {
+  Widget _cpfCheckboxAndSelector(buffalo) {
     final maxCpf = units;
 
     return Container(
@@ -152,43 +154,57 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
         color: const Color(0xFFE8F8FF),
         borderRadius: BorderRadius.circular(16),
       ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        const Text("CPF Selection",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-        const SizedBox(height: 6),
-        Text("Max CPF: $maxCpf"),
-        Text("CPF per Buffalo: ₹${buffalo.insurance}"),
-        const SizedBox(height: 12),
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          const Text("CPF Units"),
-          Row(children: [
-            GestureDetector(
-              onTap: insuranceUnits > 0
-                  ? () => setState(() => insuranceUnits--)
-                  : null,
-              child: circleButton(Icons.remove,
-                  isDisabled: insuranceUnits == 0),
-            ),
-            const SizedBox(width: 14),
-            Text("$insuranceUnits",
-                style:
-                    const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-            const SizedBox(width: 14),
-            GestureDetector(
-              onTap: insuranceUnits < maxCpf
-                  ? () => setState(() => insuranceUnits++)
-                  : null,
-              child: circleButton(Icons.add,
-                  isDisabled: insuranceUnits == maxCpf),
-            ),
-          ])
-        ])
-      ]),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, 
+        children: [
+          // Checkbox for CPF selection
+          Row(
+            children: [
+              Checkbox(
+                value: isCpfSelected,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isCpfSelected = value ?? false;
+                    if (!isCpfSelected) {
+                      insuranceUnits = 0; // Reset insurance units when CPF is unselected
+                    } else {
+                      insuranceUnits = 1; // Set default insurance units when CPF is selected
+                    }
+                  });
+                },
+              ),
+              const SizedBox(width: 8),
+              Text(
+                "Include CPF",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: isCpfSelected ? Colors.black : Colors.grey,
+                ),
+              ),
+            ],
+          ),
+          
+          // Only show CPF details if checkbox is selected
+          if (isCpfSelected) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
+            const Text("CPF Selection",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 6),
+            Text("Max CPF: $maxCpf"),
+            Text("CPF per Buffalo: ₹${buffalo.insurance}"),
+            const SizedBox(height: 12),
+            
+          ],
+        ],
+      ),
     );
   }
 
 
-  Widget _paymentSection(
+    Widget _paymentSection(
       BuildContext context, buffalo, int totalAmount) {
     return Container(
       padding: const EdgeInsets.all(18),
@@ -198,22 +214,15 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              final razorpay = RazorPayService(
-                onPaymentSuccess: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => BookingSuccessScreen()),
-                  );
-                },
-                onPaymentFailed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("Payment failed")),
-                  );
-                },
-              );
-
-              razorpay.openPayment(amount: totalAmount);
+              
+              if (!isCpfSelected) {
+                showCpfConfirmationDialog(context, () {
+                  // User clicked Yes - proceed with online payment
+                  _processOnlinePayment(totalAmount);
+                });
+              } else {
+                _processOnlinePayment(totalAmount);
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: kPrimaryGreen,
@@ -233,13 +242,25 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      ManualPaymentScreen(totalAmount: totalAmount),
-                ),
-              );
+              if (!isCpfSelected) {
+                showCpfConfirmationDialog(context, () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          ManualPaymentScreen(totalAmount: totalAmount),
+                    ),
+                  );
+                });
+              } else {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        ManualPaymentScreen(totalAmount: totalAmount),
+                  ),
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.amber,
@@ -257,8 +278,26 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
     );
   }
 
+  void _processOnlinePayment(int totalAmount) {
+    final razorpay = RazorPayService(
+      onPaymentSuccess: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (_) => BookingSuccessScreen()),
+        );
+      },
+      onPaymentFailed: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Payment failed")),
+        );
+      },
+    );
+
+    razorpay.openPayment(amount: totalAmount);
+  }
+}
  
 
 
   
-}

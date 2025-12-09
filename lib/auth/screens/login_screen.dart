@@ -148,35 +148,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ? () async {
                             setState(() => _isSendingOtp = true);
 
-                            final enteredPhone = phoneController.text.trim();
+                            final enteredPhone =
+                                phoneController.text.trim();
 
-                            // ✅ CALL REAL WHATSAPP OTP API
-                            final success = await ref
+                            final response = await ref
                                 .read(authProvider)
                                 .sendWhatsappOtp(enteredPhone);
 
                             if (!mounted) return;
 
-                            if (success) {
+                            // ✅ SERVER ERROR
+                            if (response == null) {
                               FloatingToast.showSimpleToast(
-                                "OTP sent via WhatsApp",
-                              );
-
-                              // ✅ NAVIGATE TO OTP SCREEN
-                              Navigator.pushNamed(
-                                context,
-                                AppRouter.otp,
-                                arguments: {'phoneNumber': enteredPhone},
-                              );
-                            } else {
-                              FloatingToast.showSimpleToast(
-                                "Failed to send OTP",
-                              );
+                                  "Server error. Try again.");
+                              setState(() => _isSendingOtp = false);
+                              return;
                             }
+
+                            // ✅ USER NOT FOUND / ERROR
+                            if (response.status == "error") {
+                              FloatingToast.showSimpleToast(response.message);
+                              setState(() => _isSendingOtp = false);
+                              return;
+                            }
+
+                            // ✅ SUCCESS
+                            FloatingToast.showSimpleToast(response.message);
+
+                            Navigator.pushNamed(
+                              context,
+                              AppRouter.otp,
+                              arguments: {
+                                'phoneNumber': enteredPhone,
+                                'otp': response.otp,
+                                'isFormFilled':
+                                    response.user?.isFormFilled ?? false,
+                              },
+                            );
 
                             setState(() => _isSendingOtp = false);
                           }
                         : null,
+
 
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isButtonEnabled

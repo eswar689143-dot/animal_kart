@@ -21,9 +21,7 @@ class AppRouter {
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     final args = settings.arguments as Map<String, dynamic>?;
-    final verificationId = args?['verificationId'] as String?;
-
-    final phoneNumber = args?['phoneNumber'] as String? ?? '';
+  
     switch (settings.name) {
       case splash:
         return MaterialPageRoute(builder: (_) => const SplashScreen());
@@ -31,10 +29,19 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => const OnboardingScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
-      case otp:
+     case otp:
+      final args = settings.arguments as Map<String, dynamic>;
+      final String phoneNumber = args['phoneNumber'];
+      final String otp = args['otp'];
+      final bool isFormFilled = args['isFormFilled'];
         return MaterialPageRoute(
-          builder: (_) => OtpScreen(phoneNumber: phoneNumber),
+          builder: (_) => OtpScreen(
+            phoneNumber: phoneNumber,
+            otp: otp,
+            isFormFilled: isFormFilled,
+          ),
         );
+
 
       case profileForm:
         final args = settings.arguments as Map<String, dynamic>;
