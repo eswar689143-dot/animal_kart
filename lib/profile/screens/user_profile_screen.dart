@@ -1,3 +1,4 @@
+import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/services/biometric_service.dart';
@@ -20,17 +21,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   bool _isBiometricEnabled = false;
   bool _isLoading = true;
 
-  final staticProfile = {
-    'Email': 'farmer@gmail.com',
-    'Gender': 'Male',
-    'Date of Birth': '12-06-1995',
-    'Address': 'Buffalo Farm Road',
-    'City': 'Hyderabad',
-    'State': 'Telangana',
-    'Pincode': '500001',
-  };
+  
 
-  final aadhaarNumber = 'XXXX XXXX 1234';
+  
 
   @override
   void initState() {
@@ -126,12 +119,26 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+
     return _buildProfileContent(context);
   }
 
   Widget _buildProfileContent(BuildContext context) {
     final currentLocale = ref.watch(localeProvider).locale;
+    final user = ref.watch(authProvider).userProfile;
 
+    final profileData = {
+      'Email': user?.email ?? '',
+      'Gender': user?.gender ?? '',
+      'Address': user?.address ?? '',
+      'City': user?.city ?? '',
+      'State': user?.state ?? '',
+      'Pincode': user?.pincode ?? '',
+      'Referred By Mobile': user?.referedByMobile ?? '',
+      'Referred By Name': user?.referedByName ?? '',
+    };
+
+    final aadhaarNumber = user?.aadharNumber ?? '';
     return Scaffold(
       backgroundColor: Theme.of(context).mainThemeBgColor,
       body: SingleChildScrollView(
@@ -187,10 +194,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            _infoCard(context, items: staticProfile),
+            _infoCard(context, items: profileData),
             const SizedBox(height: 20),
 
-            // ---------- AADHAAR ----------
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
@@ -206,7 +212,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
             const SizedBox(height: 40),
 
-            // ✅ ✅ APP LOCK SWITCH
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
@@ -270,7 +276,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // ✅ ✅ REFER & EARN BUTTON
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: GestureDetector(
@@ -299,7 +305,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
             const SizedBox(height: 20),
 
-            // ✅ ✅ LOGOUT BUTTON
+            
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: GestureDetector(

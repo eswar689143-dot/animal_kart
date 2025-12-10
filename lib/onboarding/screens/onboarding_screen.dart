@@ -55,8 +55,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         child: Column(
           children: [
             SizedBox(height: SizeConfig.blockHeight * 3),
-
-            /// LOGO
             Column(
               children: [
                 Container(

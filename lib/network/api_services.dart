@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:animal_kart_demo2/auth/models/device_details.dart';
+import 'package:animal_kart_demo2/auth/models/whatsapp_otp_response.dart';
 import 'package:animal_kart_demo2/buffalo/models/buffalo.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -57,61 +58,60 @@ class ApiServices {
   }
 
 
-  //send whatsapp otp
-  static Future<bool> sendWhatsappOtp(String phone) async {
-    try {
-      final response = await http.post(
-        Uri.parse(
-          "https://markwave-live-apis-couipk45fa-el.a.run.app/otp/send-whatsapp",
-        ),
-        headers: {
-          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-        },
-        body: jsonEncode({
-          "mobile": phone,
-        }),
-      );
+  static Future<WhatsappOtpResponse?> sendWhatsappOtp(String phone) async {
+  try {
+    final response = await http.post(
+      Uri.parse(
+        "https://markwave-live-apis-couipk45fa-el.a.run.app/otp/send-whatsapp",
+      ),
+      headers: {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      },
+      body: jsonEncode({"mobile": phone,  "appName":"animalkart"}),
+);
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data["status"] == "success";
-      } else {
-        return false;
-      }
-    } catch (e) {
+    final data = jsonDecode(response.body);
+    return WhatsappOtpResponse.fromJson(data);
+  } catch (e) {
+    return null;
+  }
+}
+
+static Future<bool> updateUserProfile({
+  required String mobile,
+  required Map<String, dynamic> body,
+}) async {
+  try {
+    final url =
+        "https://markwave-live-apis-couipk45fa-el.a.run.app/users/$mobile";
+
+    final response = await http.put(
+      Uri.parse(url),
+      headers: {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      },
+      body: jsonEncode(body),
+    );
+
+    
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data["status"] == "success";
+    } else {
       return false;
     }
+  } catch (e) {
+    
+    return false;
   }
-  //verify whatsapp otp
+}
 
-  static Future<bool> verifyWhatsappOtp({
-    required String phone,
-    required String otp,
-  }) async {
-    try {
-      final response = await http.post(
-        Uri.parse(
-          "https://markwave-live-apis-couipk45fa-el.a.run.app/otp/verify",
-        ),
-        headers: {
-          HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
-        },
-        body: jsonEncode({
-          "mobile": phone,
-          "otp": otp,
-        }),
-      );
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        return data["status"] == "success";
-      } else {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
-  }
+  
+
+  
+
 
 
 }

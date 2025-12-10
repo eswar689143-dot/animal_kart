@@ -3,6 +3,7 @@ import 'package:animal_kart_demo2/buffalo/screens/buffalo_list_screen.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/orders/screens/orders_screen.dart';
 import 'package:animal_kart_demo2/profile/screens/user_profile_screen.dart';
+import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:flutter/material.dart';
@@ -76,9 +77,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        if (userProfile?.phone != null)
+                        if (userProfile?.mobile != null)
                           Text(
-                            '+91 ${userProfile!.phone}',
+                            '+91 ${userProfile!.mobile}',
                             style: TextStyle(
                               color: Theme.of(context).subTotalsTextColor,
                               fontSize: 18,
@@ -113,7 +114,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Icons.notifications_none_sharp,
                               color: Colors.white,
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                               Navigator.pushNamed(
+                              context,
+                              AppRouter.notification,
+                              
+                            );
+                            },
                           ),
                         ),
                       ),
