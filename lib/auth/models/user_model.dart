@@ -65,11 +65,26 @@ class UserModel {
       city: json['city'] ?? '',
       state: json['state'] ?? '',
       pincode: json['pincode'] ?? '',
-      aadharNumber: int.parse(json['aadhar_number'].toString()),
+     aadharNumber: _parseAadhar(json['aadhar_number']),
       referedByMobile: json['refered_by_mobile'] ?? '',
       referedByName: json['refered_by_name'] ?? '',
 
       otp: json['otp'] ?? '',
     );
   }
+}
+
+int _parseAadhar(dynamic value) {
+  if (value == null) return 0;
+
+  
+  if (value is int) return value;
+
+  
+  if (value is String) {
+    final cleaned = value.replaceAll(RegExp(r'[^0-9]'), ''); // keep only digits
+    return int.tryParse(cleaned) ?? 0;
+  }
+
+  return 0;
 }

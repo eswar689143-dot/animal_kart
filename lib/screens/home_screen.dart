@@ -14,7 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:translator/translator.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({super.key});
+  final int selectedIndex;
+
+  const HomeScreen({super.key,this.selectedIndex = 0});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -32,6 +34,7 @@ String? localizedUserName;
       void initState() {
         super.initState();
         _loadLocalUser();
+        _selectedIndex = widget.selectedIndex;
         _pages = const [
           BuffaloListScreen(),
           // CartScreen(showAppBar: false),
@@ -39,44 +42,39 @@ String? localizedUserName;
           UserProfileScreen(),
         ];
       }
-      Future<String> _transliterateName(String name, String langCode) async {
-  if (name.isEmpty || langCode == 'en') return name;
 
-  try {
-    final transliteration = await translator.translate(name, from: 'en', to: langCode);
-    return transliteration.text;
-  } catch (e) {
-    return name;
-  }
-}
-Future<void> _loadLocalUser() async {
-  localUser = await loadUserFromPrefs();
-  final langCode = ref.read(localeProvider).locale.languageCode;
+        @override
+        void didChangeDependencies() {
+          super.didChangeDependencies();
 
-  localizedUserName = await _transliterateName(localUser?.name ?? '', langCode);
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is int) {
+            setState(() {
+              _selectedIndex = args;
+            });
+          }
+        }
 
-  setState(() {});
-}
 
-      // Future<void> _loadLocalUser() async {
-      // localUser = await loadUserFromPrefs();
-      //     setState(() {});
-      // }
+      Future<void> _loadLocalUser() async {
+      localUser = await loadUserFromPrefs();
+          setState(() {});
+      }
 
       void _onItemTapped(int index) {
        setState(() => _selectedIndex = index);
       }
 
-  @override
-  Widget build(BuildContext context) {
-    // final cart = ref.watch(cartProvider);
-    final authState = ref.watch(authProvider);
-    final userProfile = authState.userProfile;
+      @override
+      Widget build(BuildContext context) {
+        // final cart = ref.watch(cartProvider);
+        final authState = ref.watch(authProvider);
+        final userProfile = authState.userProfile;
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).mainThemeBgColor,
+        return Scaffold(
+          backgroundColor: Theme.of(context).mainThemeBgColor,
 
-      // ---------- CONDITIONAL COMMON APPBAR ----------
+      
                 appBar: AppBar(
               automaticallyImplyLeading: false,
               backgroundColor: Theme.of(context).isLightTheme
@@ -90,10 +88,10 @@ Future<void> _loadLocalUser() async {
                 ),
               ),
 
-              // Center title only for Orders & Profile
+             
               centerTitle: _selectedIndex != 0,
 
-              // ---------------- TITLE ----------------
+              
               title: () {
                 // PROFILE
                 if (_selectedIndex == 2) {
@@ -146,10 +144,10 @@ Future<void> _loadLocalUser() async {
                 );
               }(),
 
-              // ---------------- ACTIONS ----------------
+             
               actions: () {
-                if (_selectedIndex == 1) return const <Widget>[]; // Orders
-                if (_selectedIndex == 2) return const <Widget>[]; // Profile
+                if (_selectedIndex == 1) return const <Widget>[]; 
+                if (_selectedIndex == 2) return const <Widget>[]; 
 
                 // HOME → show notification
                 return <Widget>[

@@ -1,6 +1,5 @@
 import 'package:animal_kart_demo2/auth/screens/biometric_lock_screen.dart';
 import 'package:animal_kart_demo2/auth/firebase_options.dart';
-import 'package:animal_kart_demo2/auth/screens/register_form.dart';
 import 'package:animal_kart_demo2/theme/theme_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
