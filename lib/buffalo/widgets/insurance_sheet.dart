@@ -133,86 +133,114 @@ class InsuranceSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildInsuranceTable(
-    BuildContext context,
-    int price,
-    int insurance,
-    int row1Total,
-    int row2Total,
-    TextStyle headerStyle,
-  ) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFF10B981), width: 1),
-      ),
-      child: Column(
-        children: [
-          // Header Row
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-            decoration: const BoxDecoration(
-              color: Color(0xFFDFF7ED),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-            ),
-            child: Row(
-              children: [
-                Expanded(child: Text(context.tr("S.No"), style: headerStyle)),
-                Expanded(child: Text(context.tr("Price"), style: headerStyle)),
-                
-                Expanded(child: Text(context.tr("Insurance"), style: headerStyle, textAlign: TextAlign.center)),
-                Expanded(child: Text(context.tr("Total"), style: headerStyle, textAlign: TextAlign.right)),
-              ],
-            ),
+Widget _buildInsuranceTable(
+  BuildContext context,
+  int price,
+  int insurance,
+  int row1Total,
+  int row2Total,
+  TextStyle headerStyle,
+) {
+  return Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: const Color(0xFF10B981), width: 1),
+    ),
+    child: Column(
+      children: [
+        // HEADER
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+          decoration: const BoxDecoration(
+            color: Color(0xFFDFF7ED),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
           ),
-
-          // Row 1
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
-            color: const Color(0xFF10B981),
-            child: Row(
-              children: [
-                const Expanded(child: Text("1", style: TextStyle(fontSize: 14, color: Colors.white))),
-                Expanded(child: Text(price.toString(), style: const TextStyle(fontSize: 14, color: Colors.white))),
-                Expanded(child: Text(insurance.toString(), textAlign: TextAlign.right, style: const TextStyle(fontSize: 14, color: Colors.white))),
-                Expanded(child: Text(row1Total.toString(), textAlign: TextAlign.right, style: const TextStyle(fontSize: 14, color: Colors.white))),
-              ],
-            ),
+          child: Row(
+            children: [
+              Expanded(child: Text(context.tr("S.No"), style: headerStyle)),
+              Expanded(child: Text(context.tr("Price"), style: headerStyle)),
+              Expanded(
+                child: Center(
+                  child: Text(context.tr("CPF"), style: headerStyle),
+                ),
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(context.tr("Total"), style: headerStyle),
+                ),
+              ),
+            ],
           ),
+        ),
 
-          // Row 2
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 14),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF4FFFA),
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
-            ),
-            child: Row(
-              children: [
-                const Expanded(child: Text("2", style: TextStyle(fontSize: 14))),
-                Expanded(child: Text(price.toString(), style: const TextStyle(fontSize: 14))),
+        // ROW 1
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          color: const Color(0xFF10B981),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text("1", style: TextStyle(color: Colors.white)),
+              ),
+              Expanded(
+                child: Text(
+                  price.toString(),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+              Expanded(
+                child: Center(
+                  child: Text(
+                    insurance.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(
+                    row1Total.toString(),
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
 
-                // Strike-through insurance value
-                Expanded(
+        // ROW 2
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          decoration: const BoxDecoration(
+            color: Color(0xFFF4FFFA),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+          ),
+          child: Row(
+            children: [
+              const Expanded(child: Text("2")),
+              Expanded(child: Text(price.toString())),
+
+              // CPF COLUMN — CENTERED BLOCK
+              Expanded(
+                child: Center(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       ExactStrikeText(
-                        text: "₹${insurance.toString()}",
+                        text: "₹$insurance",
                         style: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.w500,
                           color: Colors.grey,
                         ),
-                        strikeThickness: 2.2, // 👈 adjust to match design
+                        strikeThickness: 2.2,
                         strikeColor: Colors.grey,
                       ),
-
-                      SizedBox(width: 5,),
+                      const SizedBox(width: 6),
                       Text(
                         context.tr("Free"),
                         style: const TextStyle(
-                          fontSize: 14,
                           color: Color(0xFF10B981),
                           fontWeight: FontWeight.w700,
                         ),
@@ -220,20 +248,19 @@ class InsuranceSheet extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
 
-                // Total (price only)
-                Expanded(
-                  child: Text(
-                    row2Total.toString(),
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(fontSize: 14),
-                  ),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Text(row2Total.toString()),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }

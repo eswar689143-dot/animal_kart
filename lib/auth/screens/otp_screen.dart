@@ -138,8 +138,10 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                              final user = ref.read(authProvider).userProfile;
                               final prefs =
                                 await SharedPreferences.getInstance();
+                              debugPrint(user.toString());
                              if (user != null) {
                                   await saveUserToPrefs(user);
+                                  debugPrint('✅ User saved to prefs: ${user.firstName} ${user.lastName}');
                               }
                             await prefs.setBool('isLoggedIn', true);
 

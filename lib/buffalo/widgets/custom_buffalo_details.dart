@@ -79,9 +79,11 @@ Widget priceExplanation({
 Widget cpfExplanationCard(BuildContext context, buffalo) {
   final price = buffalo.price * 2;
   final cpf = buffalo.insurance;
-  final assetValue = 6396000;
-  final revenue10Years = 7407000;
-  final breakEvenMonths = 34;
+  final assetValue = 6667000;
+;
+  final revenue10Years = 5523500;
+  final breakEvenMonths = 42;
+;
 
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -126,6 +128,10 @@ Widget cpfExplanationCard(BuildContext context, buffalo) {
 
           cpfPoint(
             context.tr('cpf_free_note'),
+            isHighlight: true,
+          ),
+           cpfPoint(
+            context.tr('cpf_warn_note'),
             isHighlight: true,
           ),
         ],

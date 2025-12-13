@@ -27,6 +27,26 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
+@override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _loadUserData();
+  });
+}
+
+Future<void> _loadUserData() async {
+  final user = await loadUserFromPrefs();
+  debugPrint("📱 Loaded user from prefs: ${user?.firstName} ${user?.lastName}");
+  
+  if (user != null && mounted) {
+    setState(() {
+      firstNameCtrl.text = user.firstName;
+      lastNameCtrl.text = user.lastName;
+      
+    });
+  }
+}
   final emailCtrl = TextEditingController();
   final firstNameCtrl = TextEditingController();
   final lastNameCtrl = TextEditingController();

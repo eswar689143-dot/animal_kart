@@ -64,9 +64,9 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     data['Email'] = await _translateValue(_user!.email, langCode);
     data['Gender'] = await _translateValue(_user!.gender, langCode);
     data['Aadhaar Card Number'] = _user!.aadharNumber.toString();
-    data['Referred By Mobile'] = _user!.referedByMobile;
-    data['Referred By Name'] =
-        await _transliterateName(_user!.referedByName, langCode);
+    // data['Referred By Mobile'] = _user!.referedByMobile;
+    // data['Referred By Name'] =
+    //     await _transliterateName(_user!.referedByName, langCode);
 
     translatedData = data;
   }

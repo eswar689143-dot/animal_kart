@@ -63,7 +63,7 @@ class ApiServices {
   try {
     final response = await http.post(
       Uri.parse(
-        "https://markwave-live-apis-couipk45fa-el.a.run.app/otp/send-whatsapp",
+        "${AppConstants.apiUrl}/otp/send-whatsapp",
       ),
       headers: {
         HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
@@ -84,7 +84,7 @@ static Future<UserModel?> updateUserProfile({
 }) async {
   try {
     final url =
-        "https://markwave-live-apis-couipk45fa-el.a.run.app/users/$mobile";
+        "${AppConstants.apiUrl}/users/$mobile";
 
     final response = await http.put(
       Uri.parse(url),

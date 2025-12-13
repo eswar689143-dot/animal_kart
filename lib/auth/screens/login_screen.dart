@@ -1,6 +1,7 @@
 import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
+import 'package:animal_kart_demo2/utils/save_user.dart';
 import 'package:animal_kart_demo2/widgets/floating_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -164,7 +165,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               setState(() => _isSendingOtp = false);
                               return;
                             }
-
+                            
                             // ✅ USER NOT FOUND / ERROR
                             if (response.status == "error") {
                               FloatingToast.showSimpleToast(response.message);

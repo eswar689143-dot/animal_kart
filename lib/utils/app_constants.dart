@@ -16,7 +16,7 @@ class AppConstants {
 
   //Api constants
   static const String apiUrl =
-      'https://markwave-live-services-couipk45fa-el.a.run.app';
+      'https://markwave-live-apis-couipk45fa-el.a.run.app';
 
   static const String applicationJson = 'application/json';
 

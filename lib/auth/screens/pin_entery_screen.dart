@@ -1,4 +1,4 @@
-// lib/auth/screens/pin_entry_screen.dart
+
 import 'package:animal_kart_demo2/services/biometric_service.dart';
 import 'package:flutter/material.dart';
 import 'package:animal_kart_demo2/services/pin_auth_services.dart';

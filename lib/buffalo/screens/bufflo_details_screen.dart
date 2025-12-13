@@ -3,7 +3,6 @@ import 'package:animal_kart_demo2/buffalo/providers/buffalo_details_provider.dar
 import 'package:animal_kart_demo2/buffalo/widgets/custom_buffalo_details.dart';
 import 'package:animal_kart_demo2/buffalo/widgets/insurance_sheet.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
-import 'package:animal_kart_demo2/revenueanalysis/screens/revenue_analysis_module.dart';
 import 'package:animal_kart_demo2/services/razorpay_service.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
@@ -90,34 +89,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
               children: [
                 _imageSlider(buffalo),
                 const SizedBox(height: 16),
-                 ElevatedButton(
-                          onPressed:  () {
-                            Navigator.push(
-                              context,
-                                MaterialPageRoute(builder: (context) => const RevenueAnalysisModule()),
-                        );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimaryGreen,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 28,
-                              vertical: 14,
-                            ),
-                          ),
-                          child: Text("view revenue",
-                            
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black,
-                              ),
-                            ),
-
-
-                        ),
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
