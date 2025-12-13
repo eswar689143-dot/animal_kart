@@ -38,6 +38,7 @@ dependencies:
   pdf: ^3.11.3
   flutter_pdfview: ^1.4.3
   translator: ^1.0.4+1
+  geolocator: ^14.0.2
 
 dev_dependencies:
   flutter_launcher_icons: ^0.13.1

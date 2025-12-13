@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/manualpayment/widgets/common_widgets.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
@@ -11,8 +13,16 @@ import 'package:animal_kart_demo2/widgets/floating_toast.dart';
 
 class ManualPaymentScreen extends StatefulWidget {
   final int totalAmount;
+   final String unitId;
+  final String userId;
+  final String buffaloId;
 
-  const ManualPaymentScreen({super.key, required this.totalAmount});
+  const ManualPaymentScreen({super.key,
+  required this.totalAmount,
+    required this.unitId,
+    required this.userId,
+    required this.buffaloId,
+  });
 
   @override
   State<ManualPaymentScreen> createState() => _ManualPaymentScreenState();
@@ -24,6 +34,125 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
   final GlobalKey<FormState> _bankFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _chequeFormKey = GlobalKey<FormState>();
 
+  bool _isUploading = false;
+
+  Future<String?> _uploadFile(
+    File file,
+    String path,
+    Function(double) onProgress,
+  ) async {
+    try {
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+      final ref = storage.ref().child(path);
+      final uploadTask = ref.putFile(
+        file,
+        SettableMetadata(contentType: "image/jpeg"),
+      );
+
+      uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+        final progress = snapshot.bytesTransferred / snapshot.totalBytes;
+        onProgress(progress);
+      });
+
+      final snapshot = await uploadTask;
+      final url = await snapshot.ref.getDownloadURL();
+      return url;
+    } catch (e) {
+      debugPrint('Error uploading file: $e');
+      return null;
+    }
+  }
+
+  Future<void> _deleteFile(String path) async {
+    try {
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+      final ref = storage.ref().child(path);
+      await ref.delete();
+      FloatingToast.showSimpleToast("Image deleted successfully");
+    } catch (e) {
+      debugPrint('Error deleting file: $e');
+      // Don't show toast here as it might be confusing if user just cleared UI
+    }
+  }
+
+  Future<void> _handleImageUpload({
+    required bool isCamera,
+    required bool isBankScreenshot,
+    required bool isChequeFront,
+    required bool isChequeBack,
+  }) async {
+    final file = await pickImage(isCamera);
+    if (file == null) return;
+
+    if (isBankScreenshot) {
+      setState(() {
+        bankScreenshot = file;
+        bankScreenshotError = null;
+        bankScreenshotProgress = 0.0;
+      });
+    } else if (isChequeFront) {
+      setState(() {
+        chequeFrontImage = file;
+        chequeFrontImageError = null;
+        chequeFrontProgress = 0.0;
+      });
+    } else if (isChequeBack) {
+      setState(() {
+        chequeBackImage = file;
+        chequeBackImageError = null;
+        chequeBackProgress = 0.0;
+      });
+    }
+
+    final now = DateTime.now();
+    final dateFolder =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+
+    String pathPrefix = "manual_payment/$dateFolder";
+    String fileName = "${DateTime.now().millisecondsSinceEpoch}.jpg";
+
+    if (isBankScreenshot) fileName = "bank_transfer_$fileName";
+    if (isChequeFront) fileName = "cheque_front_$fileName";
+    if (isChequeBack) fileName = "cheque_back_$fileName";
+
+    final url = await _uploadFile(file, "$pathPrefix/$fileName", (progress) {
+      if (mounted) {
+        setState(() {
+          if (isBankScreenshot) bankScreenshotProgress = progress;
+          if (isChequeFront) chequeFrontProgress = progress;
+          if (isChequeBack) chequeBackProgress = progress;
+        });
+      }
+    });
+
+    if (mounted) {
+      setState(() {
+        if (isBankScreenshot) {
+          bankScreenshotUrl = url;
+          bankScreenshotPath = url != null ? "$pathPrefix/$fileName" : null;
+          bankScreenshotProgress = null;
+        }
+        if (isChequeFront) {
+          chequeFrontUrl = url;
+          chequeFrontPath = url != null ? "$pathPrefix/$fileName" : null;
+          chequeFrontProgress = null;
+        }
+        if (isChequeBack) {
+          chequeBackUrl = url;
+          chequeBackPath = url != null ? "$pathPrefix/$fileName" : null;
+          chequeBackProgress = null;
+        }
+      });
+
+      if (url == null) {
+        FloatingToast.showSimpleToast("Image upload failed");
+      }
+    }
+  }
 
   // Bank Transfer Controllers
 
@@ -34,14 +163,16 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
   final bankNameCtrl = TextEditingController();
   final ifscCodeCtrl = TextEditingController();
   final transactionDateCtrl = TextEditingController();
-  String transferMode = 'NEFT'; 
+  String transferMode = 'NEFT';
   List<String> transferModes = ['NEFT', 'RTGS', 'IMPS'];
   File? bankScreenshot;
   String? bankScreenshotError;
-
+  String? bankScreenshotUrl;
+  String? bankScreenshotPath;
+  double? bankScreenshotProgress;
 
   // Cheque Payment Controllers
-  
+
   final chequeNoCtrl = TextEditingController();
   final chequeDateCtrl = TextEditingController();
   final chequeAmountCtrl = TextEditingController();
@@ -52,6 +183,15 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
   File? chequeBackImage;
   String? chequeFrontImageError;
   String? chequeBackImageError;
+
+  String? chequeFrontUrl;
+  String? chequeBackUrl;
+
+  String? chequeFrontPath;
+  String? chequeBackPath;
+
+  double? chequeFrontProgress;
+  double? chequeBackProgress;
 
   Future<File?> pickImage(bool isCamera) async {
     final picked = await ImagePicker().pickImage(
@@ -179,9 +319,13 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
-              Text(context.tr("bankTransferDetails"),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                context.tr("bankTransferDetails"),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 12),
 
               // Amount Field
@@ -252,7 +396,7 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   FieldTitle(context.tr("transferMode")),
+                  FieldTitle(context.tr("transferMode")),
                   const SizedBox(height: 4),
                   Container(
                     decoration: BoxDecoration(
@@ -270,8 +414,9 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
                           transferMode = newValue!;
                         });
                       },
-                      items: transferModes
-                          .map<DropdownMenuItem<String>>((String value) {
+                      items: transferModes.map<DropdownMenuItem<String>>((
+                        String value,
+                      ) {
                         return DropdownMenuItem<String>(
                           value: value,
                           child: Text(value),
@@ -292,28 +437,29 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
                     title: context.tr("uploadPaymentScreenshot"),
                     file: bankScreenshot,
                     isFrontImage: true,
-                    onCamera: () async {
-                      final file = await pickImage(true);
-                      if (file != null) {
-                        setState(() {
-                          bankScreenshot = file;
-                          bankScreenshotError = null;
-                        });
-                      }
-                    },
-                    onGallery: () async {
-                      final file = await pickImage(false);
-                      if (file != null) {
-                        setState(() {
-                          bankScreenshot = file;
-                          bankScreenshotError = null;
-                        });
-                      }
-                    },
+                    uploadProgress: bankScreenshotProgress,
+                    onCamera: () => _handleImageUpload(
+                      isCamera: true,
+                      isBankScreenshot: true,
+                      isChequeFront: false,
+                      isChequeBack: false,
+                    ),
+                    onGallery: () => _handleImageUpload(
+                      isCamera: false,
+                      isBankScreenshot: true,
+                      isChequeFront: false,
+                      isChequeBack: false,
+                    ),
                     onRemove: () {
+                      if (bankScreenshotPath != null) {
+                        _deleteFile(bankScreenshotPath!);
+                      }
                       setState(() {
                         bankScreenshot = null;
                         bankScreenshotError = null;
+                        bankScreenshotUrl = null;
+                        bankScreenshotPath = null;
+                        bankScreenshotProgress = null;
                       });
                     },
                   ),
@@ -333,25 +479,45 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
               ),
 
               const SizedBox(height: 20),
-              _submitButton(() {
-               
+              _submitButton(() async {
                 if (_bankFormKey.currentState!.validate()) {
-                  
                   final screenshotError =
                       BankTransferValidators.validatePaymentScreenshot(
-                          bankScreenshot);
+                        bankScreenshot,
+                      );
                   if (screenshotError != null) {
                     setState(() {
                       bankScreenshotError = screenshotError;
                     });
                     return;
-                  }                  
-                  FloatingToast.showSimpleToast(context.tr("bankTransferSubmitted"));
-                   Navigator.pushReplacementNamed(
-                                context,
-                                AppRouter.PaymentPending,
-                    ); 
-                  
+                  }
+
+                  if (bankScreenshotProgress != null) {
+                    FloatingToast.showSimpleToast(
+                      "Please wait for image upload to complete",
+                    );
+                    return;
+                  }
+
+                  if (bankScreenshotUrl == null && bankScreenshot != null) {
+                    FloatingToast.showSimpleToast(
+                      "Image upload failed, please try again",
+                    );
+                    return;
+                  }
+
+                  // Use bankScreenshotUrl here for API submission if needed
+                  debugPrint(
+                    "Submitting Bank Transfer with URL: $bankScreenshotUrl",
+                  );
+
+                  FloatingToast.showSimpleToast(
+                    context.tr("bankTransferSubmitted"),
+                  );
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRouter.PaymentPending,
+                  );
                 }
               }),
             ],
@@ -371,8 +537,10 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(context.tr("chequePaymentDetails"),
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              Text(
+                context.tr("chequePaymentDetails"),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
               const SizedBox(height: 12),
 
               // Cheque Number
@@ -397,7 +565,9 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
                     final picked = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime.now().subtract(const Duration(days: 90)),
+                      firstDate: DateTime.now().subtract(
+                        const Duration(days: 90),
+                      ),
                       lastDate: DateTime.now(),
                     );
                     if (picked != null) {
@@ -454,28 +624,29 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
                     title: context.tr("uploadChequeFrontImage"),
                     file: chequeFrontImage,
                     isFrontImage: true,
-                    onCamera: () async {
-                      final file = await pickImage(true);
-                      if (file != null) {
-                        setState(() {
-                          chequeFrontImage = file;
-                          chequeFrontImageError = null;
-                        });
-                      }
-                    },
-                    onGallery: () async {
-                      final file = await pickImage(false);
-                      if (file != null) {
-                        setState(() {
-                          chequeFrontImage = file;
-                          chequeFrontImageError = null;
-                        });
-                      }
-                    },
+                    uploadProgress: chequeFrontProgress,
+                    onCamera: () => _handleImageUpload(
+                      isCamera: true,
+                      isBankScreenshot: false,
+                      isChequeFront: true,
+                      isChequeBack: false,
+                    ),
+                    onGallery: () => _handleImageUpload(
+                      isCamera: false,
+                      isBankScreenshot: false,
+                      isChequeFront: true,
+                      isChequeBack: false,
+                    ),
                     onRemove: () {
+                      if (chequeFrontPath != null) {
+                        _deleteFile(chequeFrontPath!);
+                      }
                       setState(() {
                         chequeFrontImage = null;
                         chequeFrontImageError = null;
+                        chequeFrontUrl = null;
+                        chequeFrontPath = null;
+                        chequeFrontProgress = null;
                       });
                     },
                   ),
@@ -504,28 +675,29 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
                     title: context.tr("uploadChequeBackImage"),
                     file: chequeBackImage,
                     isFrontImage: true,
-                    onCamera: () async {
-                      final file = await pickImage(true);
-                      if (file != null) {
-                        setState(() {
-                          chequeBackImage = file;
-                          chequeBackImageError = null;
-                        });
-                      }
-                    },
-                    onGallery: () async {
-                      final file = await pickImage(false);
-                      if (file != null) {
-                        setState(() {
-                          chequeBackImage = file;
-                          chequeBackImageError = null;
-                        });
-                      }
-                    },
+                    uploadProgress: chequeBackProgress,
+                    onCamera: () => _handleImageUpload(
+                      isCamera: true,
+                      isBankScreenshot: false,
+                      isChequeFront: false,
+                      isChequeBack: true,
+                    ),
+                    onGallery: () => _handleImageUpload(
+                      isCamera: false,
+                      isBankScreenshot: false,
+                      isChequeFront: false,
+                      isChequeBack: true,
+                    ),
                     onRemove: () {
+                      if (chequeBackPath != null) {
+                        _deleteFile(chequeBackPath!);
+                      }
                       setState(() {
                         chequeBackImage = null;
                         chequeBackImageError = null;
+                        chequeBackUrl = null;
+                        chequeBackPath = null;
+                        chequeBackProgress = null;
                       });
                     },
                   ),
@@ -547,42 +719,65 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
               const SizedBox(height: 20),
 
               // Submit Button with validation
-              _submitButton(() {
+              _submitButton(() async {
                 // Validate form fields
                 if (_chequeFormKey.currentState!.validate()) {
                   // Validate images
                   final frontImageError =
                       ChequePaymentValidators.validateChequeFrontImage(
-                          chequeFrontImage);
+                        chequeFrontImage,
+                      );
                   final backImageError =
                       ChequePaymentValidators.validateChequeBackImage(
-                          chequeBackImage);
+                        chequeBackImage,
+                      );
 
                   bool hasError = false;
-                  
+
                   if (frontImageError != null) {
                     setState(() {
                       chequeFrontImageError = frontImageError;
                     });
                     hasError = true;
                   }
-                  
+
                   if (backImageError != null) {
                     setState(() {
                       chequeBackImageError = backImageError;
                     });
                     hasError = true;
                   }
-                  
+
                   if (hasError) return;
-                    Navigator.pushReplacementNamed(
-                        context,
-                      AppRouter.PaymentPending,
-                    ); 
+
+                  if (chequeFrontProgress != null ||
+                      chequeBackProgress != null) {
+                    FloatingToast.showSimpleToast(
+                      "Please wait for image upload to complete",
+                    );
+                    return;
+                  }
+
+                  if ((chequeFrontUrl == null && chequeFrontImage != null) ||
+                      (chequeBackUrl == null && chequeBackImage != null)) {
+                    FloatingToast.showSimpleToast(
+                      "Image upload failed, please try again",
+                    );
+                    return;
+                  }
+
+                  debugPrint("Cheque Front URL: $chequeFrontUrl");
+                  debugPrint("Cheque Back URL: $chequeBackUrl");
+
+                  Navigator.pushReplacementNamed(
+                    context,
+                    AppRouter.PaymentPending,
+                  );
 
                   // If all validations pass
-                  FloatingToast.showSimpleToast(context.tr("chequeDetailsSubmitted"));
-                  
+                  FloatingToast.showSimpleToast(
+                    context.tr("chequeDetailsSubmitted"),
+                  );
                 }
               }),
             ],
@@ -602,12 +797,15 @@ class _ManualPaymentScreenState extends State<ManualPaymentScreen> {
         style: ElevatedButton.styleFrom(
           backgroundColor: kPrimaryGreen,
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(25)),
+            borderRadius: BorderRadius.circular(25),
+          ),
         ),
-        child:  Text(
-          context.tr("submit"),
-          style: TextStyle(color: Colors.white, fontSize: 17),
-        ),
+        child: _isUploading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(
+                context.tr("submit"),
+                style: TextStyle(color: Colors.white, fontSize: 17),
+              ),
       ),
     );
   }

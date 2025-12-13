@@ -5,8 +5,11 @@ import 'package:animal_kart_demo2/auth/models/device_details.dart';
 import 'package:animal_kart_demo2/auth/models/user_model.dart';
 import 'package:animal_kart_demo2/auth/models/whatsapp_otp_response.dart';
 import 'package:animal_kart_demo2/buffalo/models/buffalo.dart';
+import 'package:animal_kart_demo2/buffalo/models/unit_selectin.dart';
+import 'package:animal_kart_demo2/orders/models/order_model.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
 
 class ApiServices {
@@ -106,6 +109,69 @@ static Future<UserModel?> updateUserProfile({
     return null;
   }
 }
+
+static Future<UnitSelection?> createUnitSelection({
+  required Map<String, dynamic> body,
+}) async {
+  try {
+    final url = "${AppConstants.apiUrl}/purchases/units/buy";
+
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      },
+      body: jsonEncode(body),
+    );
+
+    debugPrint("STATUS CODE: ${response.statusCode}");
+    debugPrint("RESPONSE BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data["status"] == "success" && data["unit"] != null) {
+        return UnitSelection.fromJson(data["unit"]);
+      }
+    }
+    return null;
+  } catch (e, stack) {
+    debugPrint("CREATE UNIT API ERROR: $e");
+    debugPrint(stack.toString());
+    return null;
+  }
+}
+
+static Future<List<OrderUnit>> fetchOrders(String userId) async {
+  try {
+    final url = "${AppConstants.apiUrl}/purchases/units/$userId";
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      },
+    );
+
+    debugPrint("ORDERS STATUS: ${response.statusCode}");
+    debugPrint("ORDERS BODY: ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data["status"] == "success" && data["units"] != null) {
+        return (data["units"] as List)
+            .map((e) => OrderUnit.fromJson(e))
+            .toList();
+      }
+    }
+    return [];
+  } catch (e) {
+    debugPrint("FETCH ORDERS ERROR: $e");
+    return [];
+  }
+}
+
 
 
 

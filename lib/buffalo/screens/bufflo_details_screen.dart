@@ -3,11 +3,15 @@ import 'package:animal_kart_demo2/buffalo/providers/buffalo_details_provider.dar
 import 'package:animal_kart_demo2/buffalo/widgets/custom_buffalo_details.dart';
 import 'package:animal_kart_demo2/buffalo/widgets/insurance_sheet.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
+import 'package:animal_kart_demo2/manualpayment/screens/manual_payment_screen.dart';
+import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/services/razorpay_service.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
-import 'package:animal_kart_demo2/manualpayment/screens/manual_payment_screen.dart';
 import 'package:animal_kart_demo2/widgets/payment_widgets/successful_screen.dart';
+import 'package:animal_kart_demo2/buffalo/providers/unit_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -75,21 +79,23 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
             backgroundColor: Colors.grey.shade200,
             elevation: 0,
             leading: IconButton(
-              icon: Icon(Icons.arrow_back_ios_new,
-                  color: Theme.of(context).primaryTextColor),
-            onPressed: () => Navigator.pop(context),
+              icon: Icon(
+                Icons.arrow_back_ios_new,
+                color: Theme.of(context).primaryTextColor,
+              ),
+              onPressed: () => Navigator.pop(context),
             ),
-            title: Text(context.tr("buffaloDetails"),)
+            title: Text(context.tr("buffaloDetails")),
           ),
-          bottomNavigationBar:
-              _paymentSection(context, buffalo, totalAmount),
+          bottomNavigationBar: _paymentSection(context, buffalo, totalAmount),
           body: SingleChildScrollView(
             padding: const EdgeInsets.only(bottom: 180),
             child: Column(
               children: [
+                
                 _imageSlider(buffalo),
                 const SizedBox(height: 16),
-                
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Text(
@@ -101,25 +107,25 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                 cpfExplanationCard(context, buffalo),
 
                 //cpfExplanationCard(buffalo),
-                const SizedBox(height: 10,),
+                const SizedBox(height: 10),
                 InsuranceSheet(
                   price: buffalo.price,
                   insurance: buffalo.insurance,
-                  showCancelIcon:false,
-                  showNote:false,
-                  isDragShowIcon:false
+                  showCancelIcon: false,
+                  showNote: false,
+                  isDragShowIcon: false,
                 ),
                 const SizedBox(height: 24),
                 _cpfCheckboxAndSelector(buffalo),
                 const SizedBox(height: 28),
                 priceExplanation(
                   context: context,
-                  buffalo:buffalo,
-                  units:units,
-                  insuranceUnits:insuranceUnits,
-                  buffaloPrice:buffaloPrice,
-                  cpfAmount:cpfAmount,
-                  total:totalAmount,
+                  buffalo: buffalo,
+                  units: units,
+                  insuranceUnits: insuranceUnits,
+                  buffaloPrice: buffaloPrice,
+                  cpfAmount: cpfAmount,
+                  total: totalAmount,
                 ),
               ],
             ),
@@ -129,7 +135,6 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
     );
   }
 
-  
   Widget _imageSlider(buffalo) {
     final imageList = buffalo.buffaloImages;
 
@@ -154,174 +159,210 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
     );
   }
 
+  Widget _cpfCheckboxAndSelector(buffalo) {
+    final maxCpf = units;
 
-
-  
- Widget _cpfCheckboxAndSelector(buffalo) {
-  final maxCpf = units;
-
-  return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 16),
-    padding: const EdgeInsets.all(14),
-    decoration: BoxDecoration(
-      color: const Color(0xFFE8F8FF),
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFE8F8FF),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           // Checkbox for CPF selection
-        Row(
-          children: [
-            Checkbox(
-              value: isCpfSelected,
-              onChanged: (bool? value) {
-                setState(() {
-                  isCpfSelected = value ?? false;
-                  if (!isCpfSelected) {
-                      insuranceUnits = 0; // Reset insurance units when CPF is unselected
-                  } else {
-                      insuranceUnits = 1; // Set default insurance units when CPF is selected
-                  }
-                });
-              },
-            ),
-            const SizedBox(width: 8),
-            Text(
-              context.tr("includeCpf"),
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: isCpfSelected ? Colors.black : Colors.grey,
+          Row(
+            children: [
+              Checkbox(
+                value: isCpfSelected,
+                onChanged: (bool? value) {
+                  setState(() {
+                    isCpfSelected = value ?? false;
+                    if (!isCpfSelected) {
+                      insuranceUnits =
+                          0; // Reset insurance units when CPF is unselected
+                    } else {
+                      insuranceUnits =
+                          1; // Set default insurance units when CPF is selected
+                    }
+                  });
+                },
               ),
-            ),
-          ],
-        ),
+              const SizedBox(width: 8),
+              Text(
+                context.tr("includeCpf"),
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: isCpfSelected ? Colors.black : Colors.grey,
+                ),
+              ),
+            ],
+          ),
 
           // Only show CPF details if checkbox is selected
-        if (isCpfSelected) ...[
-          const SizedBox(height: 8),
-          const Divider(),
-          const SizedBox(height: 8),
+          if (isCpfSelected) ...[
+            const SizedBox(height: 8),
+            const Divider(),
+            const SizedBox(height: 8),
 
-          Text(
-            context.tr("cpfSelection"),
-            style: const TextStyle(
-                fontSize: 16, fontWeight: FontWeight.w700),
-          ),
+            Text(
+              context.tr("cpfSelection"),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
 
-          const SizedBox(height: 6),
+            const SizedBox(height: 6),
 
-          Text("${context.tr("maxCpf")}: $maxCpf"),
+            Text("${context.tr("maxCpf")}: $maxCpf"),
 
-          Text("${context.tr("cpfPerBuffalo")}: ₹${buffalo.insurance}"),
+            Text("${context.tr("cpfPerBuffalo")}: ₹${buffalo.insurance}"),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
+          ],
         ],
-      ],
-    ),
-  );
-}
-
-
-Widget _paymentSection(
-    BuildContext context, buffalo, int totalAmount) {
-  return Container(
-    padding: const EdgeInsets.all(18),
-    child: Column(mainAxisSize: MainAxisSize.min, children: [
-      SizedBox(
-        height: 55,
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () {
-              
-            if (!isCpfSelected) {
-              showCpfConfirmationDialog(context, () {
-                  // User clicked Yes - proceed with online payment
-                _processOnlinePayment(totalAmount);
-              });
-            } else {
-              _processOnlinePayment(totalAmount);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: kPrimaryGreen,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40)),
-          ),
-          child: Text(
-             context.tr("onlinePayment"),
-            style: const TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w700),
-          ),
-        ),
       ),
-      const SizedBox(height: 12),
-      SizedBox(
-        height: 55,
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () {
-            if (!isCpfSelected) {
-              showCpfConfirmationDialog(context, () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        ManualPaymentScreen(totalAmount: totalAmount),
-                  ),
-                );
-              });
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) =>
-                      ManualPaymentScreen(totalAmount: totalAmount),
+    );
+  }
+
+  Widget _paymentSection(BuildContext context, buffalo, int totalAmount) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            height: 55,
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                if (!isCpfSelected) {
+                  showCpfConfirmationDialog(context, () {
+                    // User clicked Yes - proceed with online payment
+                    _processOnlinePayment(totalAmount);
+                  });
+                } else {
+                  _processOnlinePayment(totalAmount);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: kPrimaryGreen,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
                 ),
-              );
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.amber,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(40)),
+              ),
+              child: Text(
+                context.tr("onlinePayment"),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
-          child: Text(
-             context.tr("manualPayment"),
-            style: const TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.w700),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: 55,
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                if (!isCpfSelected) {
+                  showCpfConfirmationDialog(context, () {
+                    _handleManualPayment(buffalo.id);
+                  });
+                } else {
+                  _handleManualPayment(buffalo.id);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              child: Text(
+                context.tr("manualPayment"),
+                style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
-    ]),
-  );
-}
+    );
+  }
 
   void _processOnlinePayment(int totalAmount) {
     final razorpay = RazorPayService(
       onPaymentSuccess: () {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(
-              builder: (_) => BookingSuccessScreen()),
+          MaterialPageRoute(builder: (_) => BookingSuccessScreen()),
         );
       },
       onPaymentFailed: () {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment failed")),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text("Payment failed")));
       },
     );
 
     razorpay.openPayment(amount: totalAmount);
   }
+
+  Future<void> _handleManualPayment(String buffaloId) async {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final userMobile = prefs.getString('userMobile');
+     final latitude = prefs.getDouble('latitude');
+    final longitude = prefs.getDouble('longitude');
+
+    if (userMobile == null) {
+      Navigator.pop(context);
+      showToast("User mobile not found");
+      return;
+    }
+
+    final payload = {
+      "userId": userMobile,
+      "buffaloId": buffaloId,
+      "numUnits": 1,
+      "lat":latitude,
+      "lng":longitude,
+    
+    };
+    debugPrint(payload.toString());
+
+
+    final response = await ref
+        .read(unitProvider)
+        .createUnit(payload: payload);
+
+    if (!mounted) return;
+    Navigator.pop(context);
+
+    if (response != null) {
+      Navigator.pushReplacementNamed(context, AppRouter.home,arguments: 1);
+    } else {
+      showToast("Failed to initiate manual payment");
+    }
+  } catch (e) {
+    if (mounted) {
+      Navigator.pop(context);
+      showToast("Error: $e");
+    }
+  }
 }
- 
 
-
-  
+}

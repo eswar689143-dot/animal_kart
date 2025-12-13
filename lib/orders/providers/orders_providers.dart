@@ -1,55 +1,34 @@
+import 'package:animal_kart_demo2/orders/models/order_model.dart';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import '../models/order_model.dart';
+import '../../network/api_services.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 final ordersProvider =
-    StateNotifierProvider<OrdersNotifier, List<OrderModel>>((ref) {
-  return OrdersNotifier();
-});
+    StateNotifierProvider<OrdersController, List<OrderUnit>>(
+  (ref) => OrdersController(),
+);
 
-class OrdersNotifier extends StateNotifier<List<OrderModel>> {
-  OrdersNotifier() : super([]);
+final ordersLoadingProvider = StateProvider<bool>((ref) => false);
 
-  void loadOrders() {
-    state = [
-      OrderModel(
-        id: "ORD-1001",
-        buffaloId: "MURRAH-001",
-        breed: "Murrah Buffalo",
-        age: 3,
-        buffaloImages: [
-          "https://storage.googleapis.com/markwave-kart/productimages/murrah_1.jpeg"
-        ],
-        price: 175000,
-        insurance: 13000,
-        orderStatus: "pending",
-        userVerified: false,
-        invoiceUrl: null,
-        orderPlacedOn: "2025-12-01",
+class OrdersController extends StateNotifier<List<OrderUnit>> {
+  OrdersController() : super([]);
 
-        // ✅ NEW REQUIRED FIELDS
-        cpfQuantity: 1,     // example: 5 CPF taken
-        paidAmount: null,  // not paid yet
-      ),
+  Future<void> loadOrders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString('userMobile');
 
-      OrderModel(
-        id: "ORD-1002",
-        buffaloId: "MURRAH-001",
-        breed: "Murrah Buffalo",
-        age: 3,
-        buffaloImages: [
-          "https://storage.googleapis.com/markwave-kart/productimages/murrah_1.jpeg"
-        ],
-        price: 175000,
-        insurance: 13000,
-        orderStatus: "confirmed",
-        userVerified: true,
-        invoiceUrl: "https://example.com/invoice_1002.pdf",
-        orderPlacedOn: "2025-12-03",
+    if (userId == null) return;
 
-        // ✅ NEW REQUIRED FIELDS
-        cpfQuantity: 1,       // example: 10 CPF taken
-        paidAmount: 50000,    // ✅ paid amount available
-      ),
-    ];
+    state = [];
+    final container = ProviderContainer();
+    container.read(ordersLoadingProvider.notifier).state = true;
+
+    final orders = await ApiServices.fetchOrders(userId);
+
+    state = orders;
+    container.read(ordersLoadingProvider.notifier).state = false;
   }
 }

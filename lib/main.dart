@@ -1,6 +1,7 @@
 import 'package:animal_kart_demo2/auth/screens/biometric_lock_screen.dart';
 import 'package:animal_kart_demo2/auth/firebase_options.dart';
 import 'package:animal_kart_demo2/theme/theme_provider.dart';
+import 'package:animal_kart_demo2/utils/location_service.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_localizations/flutter_localizations.dart";
@@ -34,14 +35,44 @@ void main() async {
   );
 }
 
-class MyApp extends ConsumerWidget {
+class MyApp extends ConsumerStatefulWidget {
   final bool isDarkMode;
   final bool isLoggedIn;
 
   const MyApp({super.key, required this.isDarkMode, required this.isLoggedIn});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _fetchLocation();
+  }
+
+  Future<void> _fetchLocation() async {
+    // Add small delay to ensure context is ready if needed, though initState is early
+    await Future.delayed(const Duration(seconds: 1));
+
+    final position = await LocationService.getCurrentLocation();
+
+    if (position != null) {
+      debugPrint("Latitude: ${position.latitude}");
+      debugPrint("Longitude: ${position.longitude}");
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('latitude', position.latitude);
+      await prefs.setDouble('longitude', position.longitude);
+    } else {
+      debugPrint("Failed to get location or permission denied");
+      // Optional: Show toast or snackbar if appropriate, but be careful at startup
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final themeNotifier = ref.watch(themeNotifierProvider);
     final locale = ref.watch(localeProvider);
 
