@@ -97,9 +97,12 @@ class _MyAppState extends ConsumerState<MyApp> {
       onGenerateRoute: AppRouter.generateRoute,
 
       builder: (context, child) {
-        // Get the current route
-        final currentRoute = ModalRoute.of(context)?.settings.name;
-        debugPrint('Current route: $currentRoute');
+       
+        if (!widget.isLoggedIn) {
+          return child ?? const SizedBox();
+        }
+        //         final currentRoute = ModalRoute.of(context)?.settings.name;
+        // debugPrint('Current route: $currentRoute');
 
         // Check if we're on the home route and user is logged in
         // final isHomeRoute =
@@ -109,9 +112,13 @@ class _MyAppState extends ConsumerState<MyApp> {
         // if (isHomeRoute && isLoggedIn) {
         //   return ;
         // }
-        return BiometricLockScreen(child: child ?? const SizedBox());
+
+        
+        
+        return BiometricLockScreen(
+          child: child ?? const SizedBox(),
+        );
       },
-      // home: RegisterScreen(phoneNumberFromLogin: "6305447441"),
     );
   }
 }

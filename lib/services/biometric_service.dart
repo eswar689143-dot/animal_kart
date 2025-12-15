@@ -49,50 +49,45 @@
 //   static void lock() => isUnlocked = false;
 // }
 // lib/services/biometric_service.dart
-import 'package:flutter/material.dart';
-import 'package:local_auth/local_auth.dart';
+// lib/services/biometric_service.dart
 import 'package:flutter/services.dart';
+import 'package:local_auth/local_auth.dart';
 
 class BiometricService {
   static final LocalAuthentication _auth = LocalAuthentication();
-  static bool isUnlocked = false;
+  static bool _isUnlocked = true;
 
-  static Future<bool> get isDeviceSupported async {
-    try {
-      return await _auth.isDeviceSupported() && await _auth.canCheckBiometrics;
-    } on PlatformException catch (_) {
-      return false;
-    }
-  }
+  static bool get isUnlocked => _isUnlocked;
+
+  static void unlock() => _isUnlocked = true;
+  static void lock() => _isUnlocked = false;
 
   static Future<bool> authenticate() async {
     try {
-      final isSupported = await isDeviceSupported;
+      final isSupported = await _auth.isDeviceSupported();
       if (!isSupported) {
-        isUnlocked = true;
+        unlock();
         return true;
       }
 
       final authenticated = await _auth.authenticate(
         localizedReason: 'Authenticate to access your account',
         options: const AuthenticationOptions(
+          biometricOnly: false, // allows phone PIN / pattern
           stickyAuth: true,
-          biometricOnly: true,
+         // biometricOnly: true,
           useErrorDialogs: true,
         ),
       );
 
       if (authenticated) {
-        isUnlocked = true;
+        unlock();
         return true;
       }
+
       return false;
-    } on PlatformException catch (e) {
-      debugPrint('Error: ${e.message}');
+    } on PlatformException {
       return false;
     }
   }
-
-  static void unlock() => isUnlocked = true;
-  static void lock() => isUnlocked = false;
 }
