@@ -233,57 +233,9 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
     return picked != null ? File(picked.path) : null;
   }
 
-  void _logBankTransferDetails() {
-    final formData = BankTransferFormData(
-      amount: bankAmountCtrl.text,
-      utrNumber: utrCtrl.text,
-      bankName: bankNameCtrl.text,
-      ifscCode: ifscCodeCtrl.text,
-      transactionDate: transactionDateCtrl.text,
-      transferMode: transferMode,
-      screenshotUrl: bankScreenshotUrl,
-      screenshotPath: bankScreenshotPath,
-    );
+  
 
-    final transactionData = {
-      "unitId": widget.unitId,
-      "paymentType": "BANK_TRANSFER",
-      "userId": widget.userId,
-      "buffaloId": widget.buffaloId,
-      "transaction": formData.toJson(),
-    };
 
-    print("=== BANK TRANSFER DETAILS ===");
-    print(transactionData);
-    debugPrint(transactionData.toString());
-  }
-
-  void _logChequePaymentDetails() {
-    final formData = ChequePaymentFormData(
-      chequeNumber: chequeNoCtrl.text,
-      chequeDate: chequeDateCtrl.text,
-      amount: chequeAmountCtrl.text,
-      bankName: chequeBankNameCtrl.text,
-      ifscCode: chequeIfscCodeCtrl.text,
-      utrReference: chequeUtrRefCtrl.text,
-      frontImageUrl: chequeFrontUrl,
-      backImageUrl: chequeBackUrl,
-      frontImagePath: chequeFrontPath,
-      backImagePath: chequeBackPath,
-    );
-
-    final transactionData = {
-      "unitId": widget.unitId,
-      "paymentType": "CHEQUE",
-      "userId": widget.userId,
-      "buffaloId": widget.buffaloId,
-      "transaction": formData.toJson(),
-    };
-
-    print("=== CHEQUE PAYMENT DETAILS ===");
-    print(transactionData);
-    debugPrint(transactionData.toString());
-  }
 
 Future<void> _handleBankTransferSubmit() async {
     if (!_bankFormKey.currentState!.validate()) return;
@@ -294,6 +246,14 @@ Future<void> _handleBankTransferSubmit() async {
       setState(() => bankScreenshotError = screenshotError);
       return;
     }
+
+     final dateError =
+        _validateTransactionDate(transactionDateCtrl.text, transferMode);
+    if (dateError != null) {
+      FloatingToast.showSimpleToast(dateError);
+      return;
+    }
+
 
     if (bankScreenshotProgress != null) {
       FloatingToast.showSimpleToast(
@@ -411,32 +371,72 @@ Future<void> _handleBankTransferSubmit() async {
     }
   }
 
-  Widget _paymentSelectButton({
-    required String title,
-    required bool isSelected,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        height: 55,
-        decoration: BoxDecoration(
-          color: isSelected ? color : Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: color, width: 2),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          title,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
+   (DateTime, DateTime) _getDateConstraints(String mode) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (mode == 'IMPS') {
+      // IMPS: Only today
+      return (today, today);
+    } else if (mode == 'RTGS' || mode == 'NEFT') {
+      // RTGS/NEFT: Today to next 4 days
+      final maxDate = today.add(const Duration(days: 4));
+      return (today, maxDate);
+    } else {
+      // Default: Only today
+      return (today, today);
+    }
+  }
+   (DateTime, DateTime) _getDatePickerConstraints(String mode) {
+    final (minDate, maxDate) = _getDateConstraints(mode);
+    // For date picker, we need DateTime objects with time component
+    return (
+      DateTime(minDate.year, minDate.month, minDate.day),
+      DateTime(maxDate.year, maxDate.month, maxDate.day, 23, 59, 59)
     );
+  }
+
+   String? _validateTransactionDate(String? value, String mode) {
+    if (value == null || value.trim().isEmpty) {
+      return "Transaction date is required";
+    }
+
+    try {
+      final parts = value.split('-');
+      if (parts.length != 3) {
+        return "Invalid date format. Use YYYY-MM-DD";
+      }
+
+      final year = int.parse(parts[0]);
+      final month = int.parse(parts[1]);
+      final day = int.parse(parts[2]);
+
+      final selectedDate = DateTime(year, month, day);
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+
+      if (mode == 'IMPS') {
+        // IMPS: Only today
+        if (selectedDate.isBefore(today) || selectedDate.isAfter(today)) {
+          return "For IMPS, transaction date must be today (${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')})";
+        }
+      } else if (mode == 'RTGS' || mode == 'NEFT') {
+        // RTGS/NEFT: Today to next 4 days
+        final maxDate = today.add(const Duration(days: 4));
+        if (selectedDate.isBefore(today) || selectedDate.isAfter(maxDate)) {
+          return "For $mode, transaction date must be between today and ${maxDate.year}-${maxDate.month.toString().padLeft(2, '0')}-${maxDate.day.toString().padLeft(2, '0')}";
+        }
+      } else {
+        // Default validation: not in future
+        if (selectedDate.isAfter(now)) {
+          return "Transaction date cannot be in the future";
+        }
+      }
+    } catch (e) {
+      return "Invalid date format. Use YYYY-MM-DD";
+    }
+
+    return null;
   }
 
   @override
@@ -536,23 +536,29 @@ Future<void> _handleBankTransferSubmit() async {
               ),
               const SizedBox(height: 8),
 
-              ValidatedTextField(
+                            ValidatedTextField(
                 controller: transactionDateCtrl,
                 label: "Transaction Date",
                 readOnly: true,
-                validator: BankTransferValidators.validateTransactionDate,
+                validator: (value) =>
+                    _validateTransactionDate(value, transferMode),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.calendar_month),
                   onPressed: () async {
+                    final (firstDate, lastDate) =
+                        _getDatePickerConstraints(transferMode);
+                    
                     final picked = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime(1990),
-                      lastDate: DateTime.now(),
+                      firstDate: firstDate,
+                      lastDate: lastDate,
                     );
                     if (picked != null) {
-                      transactionDateCtrl.text =
-                          "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                      setState(() {
+                        transactionDateCtrl.text =
+                            "${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}";
+                      });
                     }
                   },
                 ),
