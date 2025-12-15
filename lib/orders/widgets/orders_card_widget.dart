@@ -1,4 +1,5 @@
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
+import 'package:animal_kart_demo2/utils/convert.dart';
 import 'package:flutter/material.dart';
 import '../models/order_model.dart';
 import '../../manualpayment/screens/manual_payment_screen.dart';
@@ -58,7 +59,7 @@ class BuffaloOrderCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    "Order Placed on: ${order.orderDate}",
+                    "Order Placed on: ${DateUtilsHelper.formatPlacedAt(order.placedAt.toString())}",
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   Container(

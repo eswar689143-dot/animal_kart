@@ -8,10 +8,9 @@ class OrderUnit {
   final String? status;
   final String paymentStatus;
   final String? paymentType;
-  final String? orderDate;
+  final String? placedAt;
   final List<OrderedBuffalo> buffalos;
 
-  /// 🔹 New field to store backend text for button/status
   
 
   OrderUnit({
@@ -24,7 +23,7 @@ class OrderUnit {
     this.status,
     required this.paymentStatus,
     this.paymentType,
-    this.orderDate,
+    this.placedAt,
     required this.buffalos,
     
   });
@@ -40,7 +39,7 @@ class OrderUnit {
       status: json['status'],
       paymentStatus: json['paymentStatus'] ?? '',
       paymentType: json['paymentType'],
-      orderDate: json['orderDate'] ?? '15-12-2025',
+      placedAt: json['placedAt'] ?? '',
       buffalos: (json['buffalos'] as List? ?? [])
           .map((e) => OrderedBuffalo.fromJson(e))
           .toList(),
