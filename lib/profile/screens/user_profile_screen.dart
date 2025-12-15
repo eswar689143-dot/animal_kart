@@ -10,7 +10,7 @@ import 'package:animal_kart_demo2/widgets/user_profile/refer_bottomsheet_widget.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:share_plus/share_plus.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../l10n/locale_provider.dart';
 import 'package:translator/translator.dart';
@@ -320,31 +320,31 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
             // Refer & Earn Button
             
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: GestureDetector(
-                onTap: () => _showReferBottomSheet(context),
-                child: Container(
-                  width: double.infinity,
-                  height: 55,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F0FF),
-                    borderRadius: BorderRadius.circular(15),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Center(
-                    child: Text(
-                      context.tr('refer_earn'),
-                      style: const TextStyle(
-                        color: Colors.blue,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 20),
+            //   child: GestureDetector(
+            //     onTap: () => _showReferBottomSheet(context),
+            //     child: Container(
+            //       width: double.infinity,
+            //       height: 55,
+            //       decoration: BoxDecoration(
+            //         color: const Color(0xFFE8F0FF),
+            //         borderRadius: BorderRadius.circular(15),
+            //         border: Border.all(color: Colors.blue.shade200),
+            //       ),
+            //       child: Center(
+            //         child: Text(
+            //           context.tr('refer_earn'),
+            //           style: const TextStyle(
+            //             color: Colors.blue,
+            //             fontSize: 20,
+            //             fontWeight: FontWeight.w600,
+            //           ),
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
 
             const SizedBox(height: 20),
 
