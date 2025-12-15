@@ -55,21 +55,33 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   }
 
   Future<void> _translateUserData() async {
-    if (_user == null) return;
+  if (_user == null) return;
 
-    final langCode = ref.read(localeProvider).locale.languageCode;
+  final langCode = ref.read(localeProvider).locale.languageCode;
+  final Map<String, String> data = {};
 
-    final Map<String, String> data = {};
-
-    data['Email'] = await _translateValue(_user!.email, langCode);
-    data['Gender'] = await _translateValue(_user!.gender, langCode);
-    data['Aadhaar Card Number'] = _user!.aadharNumber.toString();
-    // data['Referred By Mobile'] = _user!.referedByMobile;
-    // data['Referred By Name'] =
-    //     await _transliterateName(_user!.referedByName, langCode);
-
-    translatedData = data;
+  Future<void> addIfNotEmpty(String key, String? value) async {
+    if (value != null && value.trim().isNotEmpty) {
+      data[key] = await _translateValue(value, langCode);
+    }
   }
+
+  await addIfNotEmpty('Email', _user!.email);
+  await addIfNotEmpty('Gender', _user!.gender);
+
+  // ✅ Aadhaar fix
+  final aadhaar = _user!.aadharNumber;
+
+  if (aadhaar != null &&
+      aadhaar.toString().trim().isNotEmpty &&
+      aadhaar.toString() != '0') {
+    data['Aadhaar Card Number'] = aadhaar.toString();
+  }
+
+  translatedData = data;
+}
+
+    
 
   Future<String> _transliterateName(String name, String langCode) async {
     if (name.isEmpty || langCode == 'en') return name;
