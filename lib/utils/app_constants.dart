@@ -24,6 +24,8 @@ class AppConstants {
   static String appLogoAssert = 'assets/images/onboard_logo.png';
   static String onBoardAppLogo = "assets/images/onboard_logo1.png";
   static String AppNameAsset = "assets/images/app_name_text.png";
+  static String coinImage = "assets/images/coin.png";
+  static String coinDetailsImage = "assets/images/coin_details.png";
 
   //onboarding lsit
   static List<OnboardingData> onboardingData = [

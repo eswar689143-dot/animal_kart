@@ -117,36 +117,39 @@ class ChequePaymentValidators {
   }
 
   static String? validateChequeDate(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return "Cheque date is required";
-    }
-
-    try {
-      final parts = value.split('-');
-      if (parts.length == 3) {
-        final day = int.parse(parts[0]);
-        final month = int.parse(parts[1]);
-        final year = int.parse(parts[2]);
-        final chequeDate = DateTime(year, month, day);
-        final now = DateTime.now();
-        
-        // Check if cheque date is in the future
-        if (chequeDate.isAfter(now)) {
-          return "Cheque date cannot be in the future";
-        }
-        
-        // Check if cheque is older than 3 months (90 days)
-          // final difference = now.difference(chequeDate).inDays;
-          // if (difference > 90) {
-          //   return "Cheque date cannot be older than 3 months";
-          // }
-      }
-    } catch (e) {
-      return "Invalid date format. Use DD-MM-YYYY";
-    }
-
-    return null;
+  if (value == null || value.trim().isEmpty) {
+    return "Cheque date is required";
   }
+
+  try {
+    final parts = value.split('-');
+    if (parts.length != 3) {
+      return "Invalid date format. Use YYYY-MM-DD";
+    }
+
+    final year = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final day = int.parse(parts[2]);
+
+    final selectedDate = DateTime(year, month, day);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    // Calculate 3 months before and after today
+    final minDate = DateTime(today.year, today.month - 3, today.day);
+    final maxDate = DateTime(today.year, today.month + 3, today.day);
+
+    if (selectedDate.isBefore(minDate) || selectedDate.isAfter(maxDate)) {
+      final minDateStr = "${minDate.year}-${minDate.month.toString().padLeft(2, '0')}-${minDate.day.toString().padLeft(2, '0')}";
+      final maxDateStr = "${maxDate.year}-${maxDate.month.toString().padLeft(2, '0')}-${maxDate.day.toString().padLeft(2, '0')}";
+      return "Cheque date must be between $minDateStr and $maxDateStr";
+    }
+  } catch (e) {
+    return "Invalid date format. Use YYYY-MM-DD";
+  }
+
+  return null;
+}
 
   static String? validateChequeBankName(String? value) {
     if (value == null || value.trim().isEmpty) {

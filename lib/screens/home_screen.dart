@@ -1,4 +1,5 @@
 import 'package:animal_kart_demo2/auth/models/user_model.dart';
+
 import 'package:animal_kart_demo2/buffalo/screens/buffalo_list_screen.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/orders/screens/orders_screen.dart';
@@ -6,7 +7,8 @@ import 'package:animal_kart_demo2/profile/screens/user_profile_screen.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
-import 'package:animal_kart_demo2/widgets/coin_widget.dart';
+import 'package:animal_kart_demo2/utils/save_user.dart';
+import 'package:animal_kart_demo2/widgets/coin_widget.dart'; 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -91,7 +93,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ---------- AppBar Title ----------
+
   Widget _buildTitle(BuildContext context) {
     if (_selectedIndex == 2) {
       // Profile Screen
@@ -135,7 +137,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  // ---------- AppBar Actions ----------
+
  // ---------- AppBar Actions ----------
 List<Widget> _buildActions(BuildContext context) {
   if (_selectedIndex == 1) return const []; // Orders → no actions

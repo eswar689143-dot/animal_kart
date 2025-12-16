@@ -372,72 +372,64 @@ Future<void> _handleBankTransferSubmit() async {
   }
 
    (DateTime, DateTime) _getDateConstraints(String mode) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    if (mode == 'IMPS') {
-      // IMPS: Only today
-      return (today, today);
-    } else if (mode == 'RTGS' || mode == 'NEFT') {
-      // RTGS/NEFT: Today to next 4 days
-      final maxDate = today.add(const Duration(days: 4));
-      return (today, maxDate);
-    } else {
-      // Default: Only today
-      return (today, today);
-    }
-  }
+  final now = DateTime.now();
+  final today = DateTime(now.year, now.month, now.day);
+  
+  // For all modes: 3 months before to 3 months after today
+  final minDate = DateTime(today.year, today.month - 3, today.day);
+  final maxDate = DateTime(today.year, today.month + 3, today.day);
+  
+  return (minDate, maxDate);
+}
    (DateTime, DateTime) _getDatePickerConstraints(String mode) {
-    final (minDate, maxDate) = _getDateConstraints(mode);
-    // For date picker, we need DateTime objects with time component
-    return (
-      DateTime(minDate.year, minDate.month, minDate.day),
-      DateTime(maxDate.year, maxDate.month, maxDate.day, 23, 59, 59)
-    );
+  final (minDate, maxDate) = _getDateConstraints(mode);
+  // For date picker, we need DateTime objects with time component
+  return (
+    DateTime(minDate.year, minDate.month, minDate.day),
+    DateTime(maxDate.year, maxDate.month, maxDate.day, 23, 59, 59)
+  );
   }
 
-   String? _validateTransactionDate(String? value, String mode) {
-    if (value == null || value.trim().isEmpty) {
-      return "Transaction date is required";
-    }
+  String? _validateTransactionDate(String? value, String mode) {
+  if (value == null || value.trim().isEmpty) {
+    return "Transaction date is required";
+  }
 
-    try {
-      final parts = value.split('-');
-      if (parts.length != 3) {
-        return "Invalid date format. Use YYYY-MM-DD";
-      }
-
-      final year = int.parse(parts[0]);
-      final month = int.parse(parts[1]);
-      final day = int.parse(parts[2]);
-
-      final selectedDate = DateTime(year, month, day);
-      final now = DateTime.now();
-      final today = DateTime(now.year, now.month, now.day);
-
-      if (mode == 'IMPS') {
-        // IMPS: Only today
-        if (selectedDate.isBefore(today) || selectedDate.isAfter(today)) {
-          return "For IMPS, transaction date must be today (${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')})";
-        }
-      } else if (mode == 'RTGS' || mode == 'NEFT') {
-        // RTGS/NEFT: Today to next 4 days
-        final maxDate = today.add(const Duration(days: 4));
-        if (selectedDate.isBefore(today) || selectedDate.isAfter(maxDate)) {
-          return "For $mode, transaction date must be between today and ${maxDate.year}-${maxDate.month.toString().padLeft(2, '0')}-${maxDate.day.toString().padLeft(2, '0')}";
-        }
-      } else {
-        // Default validation: not in future
-        if (selectedDate.isAfter(now)) {
-          return "Transaction date cannot be in the future";
-        }
-      }
-    } catch (e) {
+  try {
+    final parts = value.split('-');
+    if (parts.length != 3) {
       return "Invalid date format. Use YYYY-MM-DD";
     }
 
-    return null;
+    final year = int.parse(parts[0]);
+    final month = int.parse(parts[1]);
+    final day = int.parse(parts[2]);
+
+    final selectedDate = DateTime(year, month, day);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    
+    // Calculate 3 months before and after today
+    final minDate = DateTime(today.year, today.month - 3, today.day);
+    final maxDate = DateTime(today.year, today.month + 3, today.day);
+
+    // Validate against the 3-month range for all modes
+    if (selectedDate.isBefore(minDate) || selectedDate.isAfter(maxDate)) {
+      final minDateStr = "${minDate.year}-${minDate.month.toString().padLeft(2, '0')}-${minDate.day.toString().padLeft(2, '0')}";
+      final maxDateStr = "${maxDate.year}-${maxDate.month.toString().padLeft(2, '0')}-${maxDate.day.toString().padLeft(2, '0')}";
+      return "Transaction date must be between $minDateStr and $maxDateStr";
+    }
+    
+  } catch (e) {
+    return "Invalid date format. Use YYYY-MM-DD";
   }
+
+  return null;
+}
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -695,13 +687,16 @@ Future<void> _handleBankTransferSubmit() async {
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.calendar_month),
                   onPressed: () async {
+                    final now = DateTime.now();
+                  final today = DateTime(now.year, now.month, now.day);
+                 final minDate = DateTime(today.year, today.month - 3, today.day);
+                  final maxDate = DateTime(today.year, today.month + 3, today.day);
                     final picked = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime.now().subtract(
-                        const Duration(days: 90),
-                      ),
-                      lastDate: DateTime.now(),
+                      firstDate: minDate,
+                      lastDate: maxDate,
+
                     );
                     if (picked != null) {
                       chequeDateCtrl.text =
