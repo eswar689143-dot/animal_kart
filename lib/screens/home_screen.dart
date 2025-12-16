@@ -2,13 +2,13 @@ import 'package:animal_kart_demo2/auth/models/user_model.dart';
 import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
 import 'package:animal_kart_demo2/buffalo/screens/buffalo_list_screen.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
-import 'package:animal_kart_demo2/l10n/locale_provider.dart';
 import 'package:animal_kart_demo2/orders/screens/orders_screen.dart';
 import 'package:animal_kart_demo2/profile/screens/user_profile_screen.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/save_user.dart';
+import 'package:animal_kart_demo2/widgets/coin_widget.dart'; // CoinBadge
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:translator/translator.dart';
@@ -23,250 +23,199 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-      int _selectedIndex = 0;
+  int _selectedIndex = 0;
 
-      late final List<Widget> _pages;
-      UserModel? localUser;
-      final translator = GoogleTranslator();
+  late final List<Widget> _pages;
+  UserModel? localUser;
+  final translator = GoogleTranslator();
 String? localizedUserName;
 
-      @override
-      void initState() {
-        super.initState();
-        _loadLocalUser();
-        _selectedIndex = widget.selectedIndex;
-        _pages = const [
-          BuffaloListScreen(),
-          // CartScreen(showAppBar: false),
-          OrdersScreen(),
-          UserProfileScreen(),
-        ];
-      }
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+    _pages = const [
+      BuffaloListScreen(),
+      OrdersScreen(),
+      UserProfileScreen(),
+    ];
+    _loadLocalUser();
+  }
 
-        @override
-        void didChangeDependencies() {
-          super.didChangeDependencies();
+  Future<void> _loadLocalUser() async {
+    localUser = await loadUserFromPrefs();
+    setState(() {});
+  }
 
-          final args = ModalRoute.of(context)?.settings.arguments;
-          if (args is int) {
-            setState(() {
-              _selectedIndex = args;
-            });
-          }
-        }
+  void _onItemTapped(int index) {
+    setState(() => _selectedIndex = index);
+  }
 
-
-      Future<void> _loadLocalUser() async {
-      localUser = await loadUserFromPrefs();
-          setState(() {});
-      }
-
-      void _onItemTapped(int index) {
-       setState(() => _selectedIndex = index);
-      }
-
-      @override
-      Widget build(BuildContext context) {
-        // final cart = ref.watch(cartProvider);
-        final authState = ref.watch(authProvider);
-        final userProfile = authState.userProfile;
-
-        return Scaffold(
-          backgroundColor: Theme.of(context).mainThemeBgColor,
-
-      
-                appBar: AppBar(
-              automaticallyImplyLeading: false,
-              backgroundColor: Theme.of(context).isLightTheme
-                  ? kPrimaryDarkColor
-                  : akDialogBackgroundColor,
-              elevation: 0,
-              toolbarHeight: 90,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(
-                  bottom: Radius.circular(30),
-                ),
-              ),
-
-             
-              centerTitle: _selectedIndex != 0,
-
-              
-              title: () {
-                // PROFILE
-                if (_selectedIndex == 2) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        localUser?.name ?? 'User Profile',
-                        style: TextStyle(
-                          color: Theme.of(context).primaryTextColor,
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      
-                        Text(
-                          '+91 ${localUser?.mobile ?? ''}',
-                          style: TextStyle(
-                            color: Theme.of(context).secondaryTextColor,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                    ],
-                  );
-                }
-
-               if (_selectedIndex == 1) {
-  return Text(
-    context.tr("orderHistory"), // localized term
-    style: const TextStyle(
-      color: Colors.white,
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-    ),
-  );
-}
-
-            
-
-              
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Image.asset(
-                      'assets/images/onboard_logo.png',
-                      height: 50,
-                    ),
-                  ],
-                );
-              }(),
-
-             
-              actions: () {
-                if (_selectedIndex == 1) return const <Widget>[]; 
-                if (_selectedIndex == 2) return const <Widget>[]; 
-
-                // HOME → show notification
-                return <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white24,
-                      ),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.notifications_none_sharp,
-                          color: Colors.white,
-                        ),
-                        onPressed: () {
-                           Navigator.pushNamed(context, AppRouter.notification);
-                        },
-                      ),
-                    ),
-                  ),
-                ];
-              }(),
-            ),
-
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Theme.of(context).mainThemeBgColor,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: Theme.of(context).isLightTheme
+            ? kPrimaryDarkColor
+            : Colors.grey[850],
+        elevation: 0,
+        toolbarHeight: 90,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(30)),
+        ),
+        centerTitle: _selectedIndex != 0,
+        title: _buildTitle(context),
+        actions: _buildActions(context),
+      ),
       body: _pages[_selectedIndex],
+      bottomNavigationBar: _buildBottomNav(),
+    );
+  }
 
-      // ---------- CUSTOM BOTTOM NAV ----------
-      bottomNavigationBar: SafeArea(
-        child: Container(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-          decoration: BoxDecoration(
-            color: Theme.of(context).isLightTheme
-                ? kCardBg
-                : akDialogBackgroundColor,
-            borderRadius: BorderRadius.circular(40),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
+  // ---------- AppBar Title ----------
+  Widget _buildTitle(BuildContext context) {
+    if (_selectedIndex == 2) {
+      // Profile Screen
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            localUser?.name ?? 'User Profile',
+            style: TextStyle(
+              color: Theme.of(context).primaryTextColor,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _navItem(index: 0, icon: Icons.home_rounded, label: "Home"),
-              // Stack(
-              //   clipBehavior: Clip.none,
-              //   children: [
-              //     _navItem(
-              //       index: 1,
-              //       icon: Icons.shopping_bag_outlined,
-              //       label: "My Cart",
-              //     ),
-              //     if (cart.isNotEmpty)
-              //       Positioned(
-              //         right: -6,
-              //         top: -4,
-              //         child: Container(
-              //           padding: const EdgeInsets.all(5),
-              //           decoration: const BoxDecoration(
-              //             color: Colors.red,
-              //             shape: BoxShape.circle,
-              //           ),
-              //           child: Text(
-              //             cart.length.toString(),
-              //             style: const TextStyle(
-              //               fontSize: 11,
-              //               color: Colors.white,
-              //               fontWeight: FontWeight.bold,
-              //             ),
-              //           ),
-              //         ),
-              //       ),
-              //   ],
-              // ),
-              _navItem(index: 1, icon: Icons.shopping_cart, label: "orders"),
+          Text(
+            '+91 ${localUser?.mobile ?? ''}',
+            style: TextStyle(
+              color: Theme.of(context).secondaryTextColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      );
+    } else if (_selectedIndex == 1) {
+      // Orders
+      return Text(
+        context.tr("orderHistory"),
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    } else {
+      // Home
+      return Image.asset(
+        'assets/images/onboard_logo.png',
+        height: 50,
+      );
+    }
+  }
 
-              _navItem(index: 2, icon: Icons.person_outline, label: "Profile"),
-            ],
+  // ---------- AppBar Actions ----------
+ // ---------- AppBar Actions ----------
+List<Widget> _buildActions(BuildContext context) {
+  if (_selectedIndex == 1) return const []; // Orders → no actions
+
+  List<Widget> actions = [
+    const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 12),
+      child: CoinBadge(),
+    ),
+  ];
+
+  // Only Home → add notifications
+  if (_selectedIndex == 0) {
+    actions.add(
+      Padding(
+        padding: const EdgeInsets.only(right: 16),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white24,
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.notifications_none, color: Colors.white),
+            onPressed: () {
+              Navigator.pushNamed(context, AppRouter.notification);
+            },
           ),
         ),
       ),
     );
   }
 
- Widget _navItem({
-        required int index,
-        required IconData icon,
-        required String label,
-      }) {
-        final isSelected = _selectedIndex == index;
+  return actions;
+}
 
-        return GestureDetector(
-          onTap: () => _onItemTapped(index),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 26,
-                color: isSelected ? kPrimaryGreen : Colors.grey.shade600,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                context.tr(label),
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected ? kPrimaryGreen : Colors.grey.shade600,
-                ),
-              ),
-            ],
+
+  // ---------- Bottom Navigation ----------
+  Widget _buildBottomNav() {
+    return SafeArea(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).isLightTheme
+              ? Colors.white
+              : Colors.grey[850],
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _navItem(index: 0, icon: Icons.home_rounded, label: "Home"),
+            _navItem(index: 1, icon: Icons.shopping_cart, label: "orders"),
+            _navItem(index: 2, icon: Icons.person_outline, label: "Profile"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _navItem({
+    required int index,
+    required IconData icon,
+    required String label,
+  }) {
+    final isSelected = _selectedIndex == index;
+
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 26,
+            color: isSelected ? kPrimaryGreen : Colors.grey.shade600,
           ),
-        );
-      }
-    }
+          const SizedBox(height: 4),
+          Text(
+            context.tr(label),
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: isSelected ? kPrimaryGreen : Colors.grey.shade600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

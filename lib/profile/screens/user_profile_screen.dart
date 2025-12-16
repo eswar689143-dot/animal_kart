@@ -2,6 +2,7 @@ import 'package:animal_kart_demo2/auth/models/user_model.dart';
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/services/biometric_service.dart';
+import 'package:animal_kart_demo2/services/refer_service.dart';
 import 'package:animal_kart_demo2/services/secure_storage_service.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/save_user.dart' as UserPrefsService;
@@ -29,6 +30,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
   Map<String, String> translatedData = {};
   final translator = GoogleTranslator();
 
+
   @override
   void initState() {
     super.initState();
@@ -39,6 +41,7 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
     // Load user data
     final user = await UserPrefsService.loadUserFromPrefs();
     _user = user;
+//_coins = await ReferCoinService.getCoins();
 
     // Load biometric status
     final enabled = await SecureStorageService.isBiometricEnabled();
@@ -263,6 +266,8 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
                 ),
               ),
             ),
+
+
             const SizedBox(height: 12),
             InfoCardWidget(items: translatedData),
             const SizedBox(height: 20),
@@ -332,31 +337,31 @@ class _UserProfileScreenState extends ConsumerState<UserProfileScreen> {
 
             // Refer & Earn Button
             
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 20),
-            //   child: GestureDetector(
-            //     onTap: () => _showReferBottomSheet(context),
-            //     child: Container(
-            //       width: double.infinity,
-            //       height: 55,
-            //       decoration: BoxDecoration(
-            //         color: const Color(0xFFE8F0FF),
-            //         borderRadius: BorderRadius.circular(15),
-            //         border: Border.all(color: Colors.blue.shade200),
-            //       ),
-            //       child: Center(
-            //         child: Text(
-            //           context.tr('refer_earn'),
-            //           style: const TextStyle(
-            //             color: Colors.blue,
-            //             fontSize: 20,
-            //             fontWeight: FontWeight.w600,
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
-            // ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: GestureDetector(
+                onTap: () => _showReferBottomSheet(context),
+                child: Container(
+                  width: double.infinity,
+                  height: 55,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F0FF),
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.blue.shade200),
+                  ),
+                  child: Center(
+                    child: Text(
+                      context.tr('refer_earn'),
+                      style: const TextStyle(
+                        color: Colors.blue,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
             const SizedBox(height: 20),
 
