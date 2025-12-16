@@ -994,7 +994,12 @@ Future<void> _handleBankTransferSubmit() async {
                 borderRadius: BorderRadius.circular(6),
               ),
             ),
-            child: const Text("Open Camera"),
+            child: const Text("Open Camera",
+            style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),),
           ),
         ],
       ),

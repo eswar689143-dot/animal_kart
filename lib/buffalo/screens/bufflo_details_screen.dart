@@ -85,7 +85,12 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
               ),
               onPressed: () => Navigator.pop(context),
             ),
-            title: Text(context.tr("buffaloDetails")),
+            title: Text(context.tr("buffaloDetails"),
+            style: const TextStyle(
+                  color: kPrimaryDarkColor,
+                  //fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),),
           ),
           bottomNavigationBar: _paymentSection(context, buffalo, totalAmount),
           body: SingleChildScrollView(
