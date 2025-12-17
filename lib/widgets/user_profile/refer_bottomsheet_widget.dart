@@ -85,7 +85,7 @@ class ReferBottomSheet extends StatelessWidget {
             isSmallScreen,
             icon: Icons.currency_rupee,
             title: "Earn Coins",
-            description: "Every referral gives 5% unit value as coins.",
+            description: "Every referral gives 2% unit value as coins.",
           ),
           _stepCard(
             isSmallScreen,
