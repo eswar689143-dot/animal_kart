@@ -1,13 +1,25 @@
+import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 class TrackerScreen extends StatefulWidget {
-  final String buffaloType = 'Murrah Buffalo';
-  final int unitCount = 1;
-  final String purchaseDate = '2024-01-15';
+  final String buffaloType;
+  final int unitCount;
+  final String purchaseDate;
+  final int buffaloCount;
+  final int calfCount;
+  final int totalUnitcost;
 
-  const TrackerScreen({super.key});
+
+  const TrackerScreen({super.key,
+  required this.buffaloType,
+  required this.unitCount,
+  required this.purchaseDate,
+  required this.buffaloCount,
+  required this.calfCount,
+  required this.totalUnitcost
+  });
 
   @override
   State<TrackerScreen> createState() => _TrackerScreenState();
@@ -84,65 +96,112 @@ class _TrackerScreenState extends State<TrackerScreen> {
   }
 
   Widget _buildHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.brown.withOpacity(0.1),
-                child: const Icon(Icons.pets, color: Colors.brown, size: 30),
-              ),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.buffaloType,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${widget.unitCount} Unit • Purchase Date: ${widget.purchaseDate}',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                ],
-              )
-            ],
-          ),
-          const SizedBox(height: 16),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: LinearProgressIndicator(
-              value: 0.56,
-              backgroundColor: Colors.grey[200],
-              color: Colors.green,
-              minHeight: 8,
+    return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '56% Complete',
-            style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
-          ),
-          const Divider(height: 40, thickness: 1),
-        ],
-      ),
-    );
-  }
+          ],
+        ),
+        child:
+        Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start, // aligns everything at the top
+            children: [
+            
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.asset(
+                      "assets/images/buffalo_image2.png",
+                      height: 70,
+                      width: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Breed ID: ${widget.buffaloType}",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              _valueRow(context, "${widget.buffaloCount}", context.tr("buffalo")),
+                              const SizedBox(width: 6),
+                              _valueRow(context, "${widget.calfCount}", context.tr("calf")),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            "${widget.unitCount} ${context.tr("unit")} + CPF",
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+              
+                    Container(
+                      height: 70, // match image or content height
+                      width: 1,
+                      color: Colors.grey.withOpacity(0.5),
+                      margin: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
+
+           
+                Column(
+                          mainAxisAlignment: MainAxisAlignment.start, 
+                          crossAxisAlignment: CrossAxisAlignment.start, 
+                          children: [
+                            Text(
+                              "Total",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          // const SizedBox(height: 4),
+                            Text(
+                              "₹${_formatAmount(widget.totalUnitcost)}",
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ));
+              }
 
   Widget _buildTimeline() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: FixedTimeline.tileBuilder(
         theme: TimelineThemeData(
-          nodePosition: 0, // This pushes the line to the LEFT
+          nodePosition: 0, 
           connectorTheme: const ConnectorThemeData(
             thickness: 3.0,
-            color: Color(0xffd3d3d3),
+            color: kPrimaryDarkColor,
           ),
           indicatorTheme: const IndicatorThemeData(
             size: 30.0,
@@ -175,20 +234,20 @@ class _TrackerScreenState extends State<TrackerScreen> {
                 children: [
                   Text(
                     step.date,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 13),
+                    style: TextStyle(fontSize: 13,fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   Row(
                     children: [
                       if (index <= _currentStep)
-                        const Icon(Icons.check_circle, color: Colors.green, size: 20),
+                        const Icon(Icons.check_circle, color: kPrimaryDarkColor, size: 20),
                       const SizedBox(width: 8),
                       Text(
                         step.title,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: index <= _currentStep ? Colors.green : Colors.grey[400],
+                          color: index <= _currentStep ? kPrimaryDarkColor : Colors.grey[400],
                         ),
                       ),
                     ],
@@ -196,11 +255,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   const SizedBox(height: 8),
                   Text(
                     step.description,
-                    style: TextStyle(color: Colors.grey[700], fontSize: 15),
+                    style: TextStyle( fontSize: 15,fontWeight: FontWeight.w500),
                   ),
-                  const SizedBox(height: 16),
-                  if (index < _steps.length - 1)
-                    Divider(color: Colors.grey[200], thickness: 1),
+                  
+                  
                 ],
               ),
             );
@@ -208,6 +266,28 @@ class _TrackerScreenState extends State<TrackerScreen> {
           itemCount: _steps.length,
         ),
       ),
+    );
+  }
+
+  Widget _divider() {
+    return Container(
+      height: 1,
+      width: double.infinity,
+      color: Colors.grey.withOpacity(0.4),
+    );
+  }
+
+  Widget _valueRow(BuildContext context, String value, String label) {
+    return Text(
+      "$value $label",
+      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+    );
+  }
+
+  static String _formatAmount(int amount) {
+    return amount.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+      (m) => '${m[1]},',
     );
   }
 }
