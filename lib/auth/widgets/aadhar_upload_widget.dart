@@ -9,7 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class AadhaarUploadWidget extends ConsumerWidget {
   final File? file;
-  final String title; // Now using localization key
+  final String title; 
   final VoidCallback onRemove;
   final VoidCallback onCamera;
   final VoidCallback onGallery;
@@ -39,7 +39,7 @@ class AadhaarUploadWidget extends ConsumerWidget {
             Text(context.tr(title), style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 12),
 
-            /// ✅ NO UPLOAD LOGIC, ONLY STATIC PREVIEW
+            
             if (file != null)
               _buildFilePreview(context)
             else

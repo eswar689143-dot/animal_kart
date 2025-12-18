@@ -57,7 +57,11 @@ Future<void> _loadUserData() async {
 
   File? aadhaarFront;
   File? aadhaarBack;
+  File? panCard;
+
   Map<String, String> aadhaarUrls = {};
+  String? panCardUrl;
+
 
   String gender = "Male";
   DateTime? selectedDOB;
@@ -85,6 +89,9 @@ Future<void> _loadUserData() async {
     );
     final isBackUploading = ref.watch(
       userProfileProvider.select((val) => val.backUploadProgress),
+    );
+    final isPanUploading = ref.watch(
+      userProfileProvider.select((val) => val.panUploadProgress),
     );
 
     return Scaffold(
@@ -427,6 +434,34 @@ Future<void> _loadUserData() async {
                                 uploadProgress: isBackUploading,
                               ),
                               const SizedBox(height: 10),
+                              AadhaarUploadWidget(
+                                title: "Upload PAN Card Image (Mandatory)",
+                                file: panCard,
+                                isFrontImage: true, // You can set this to false or add a new parameter if needed
+                                onCamera: () async {
+                                  final file = await pickFromCamera();
+                                  if (file != null) {
+                                    setState(() => panCard = file);
+                                    // Start upload immediately after selection
+                                    await _uploadPanCard();
+                                  }
+                                },
+                                onGallery: () async {
+                                  final file = await pickImage();
+                                  if (file != null) {
+                                    setState(() => panCard = file);
+                                    // Start upload immediately after selection
+                                    await _uploadPanCard();
+                                  }
+                                },
+                                onRemove: () async {
+                                  // Delete from Firebase and update local state
+                                  await _deletePanCard();
+                                },
+                                uploadProgress: isPanUploading,
+                            ),
+                              
+
                             ],
                           ),
                         ),
@@ -568,6 +603,50 @@ Future<void> _loadUserData() async {
     }
   }
 
+
+
+Future<void> _uploadPanCard() async {
+  
+
+  try {
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+    final url = await ref
+        .read(userProfileProvider.notifier)
+        .uploadPanCard(file: panCard!, userId: userId);
+
+    if (url != null && mounted) {
+      setState(() {
+        panCardUrl = url;
+      });
+      FloatingToast.showSimpleToast('PAN card uploaded successfully');
+    }
+  } catch (e) {
+    if (mounted) {
+      FloatingToast.showSimpleToast('Failed to upload PAN card');
+    }
+  }
+}
+
+Future<void> _deletePanCard() async {
+  try {
+    final userId = FirebaseAuth.instance.currentUser?.uid ?? 'unknown';
+    final success = await ref
+        .read(userProfileProvider.notifier)
+        .deletePanCard(userId: userId);
+
+    if (success && mounted) {
+      setState(() {
+        panCard = null;
+        panCardUrl = null;
+      });
+    }
+  } catch (e) {
+    if (mounted) {
+      FloatingToast.showSimpleToast('Failed to delete PAN card');
+    }
+  }
+}
+
   // PICK IMAGE ------
   Future<File?> pickImage() async {
     final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -640,6 +719,11 @@ Future<void> _loadUserData() async {
         return;
       }
     }
+    if (panCardUrl == null) {
+      FloatingToast.showSimpleToast("PAN card is mandatory. Please upload PAN card.");
+      return;
+    }
+
 
     final auth = ref.read(authProvider.notifier);
     final userId = widget.phoneNumberFromLogin;
@@ -655,6 +739,7 @@ Future<void> _loadUserData() async {
       'aadhar_number': aadhaarCtrl.text.trim(),
       'first_name': firstNameCtrl.text.trim(),
       "last_name": lastNameCtrl.text.trim(),
+      'pancard': panCardUrl,
     };
 
     if (aadhaarUrls['aadhaar_front_url'] != null) {

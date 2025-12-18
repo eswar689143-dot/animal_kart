@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:animal_kart_demo2/widgets/floating_toast.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -14,14 +13,76 @@ final userProfileProvider = ChangeNotifierProvider<UserProfileNotifier>(
 class UserProfileNotifier extends ChangeNotifier {
   double? _frontUploadProgress;
   double? _backUploadProgress;
+  double? _panUploadProgress; 
   bool _isFrontUploading = false;
   bool _isBackUploading = false;
+  bool _isPanUploading = false;
 
   double? get frontUploadProgress => _frontUploadProgress;
   double? get backUploadProgress => _backUploadProgress;
+  double? get panUploadProgress => _panUploadProgress; 
   bool get isFrontUploading => _isFrontUploading;
   bool get isBackUploading => _isBackUploading;
-  bool get isUploading => _isFrontUploading || _isBackUploading;
+   bool get isPanUploading => _isPanUploading; 
+  bool get isUploading => _isFrontUploading || _isBackUploading || _isPanUploading;
+
+
+    Future<String?> uploadPanCard({
+    required File file,
+    required String userId,
+  }) async {
+    try {
+      _isPanUploading = true;
+      _panUploadProgress = 0.0;
+      notifyListeners();
+
+      final now = DateTime.now();
+      final dateFolder =
+          '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+
+      final url = await _uploadFile(
+        storage,
+        file,
+        "userpics/$dateFolder/${userId}_pan_card.jpg",
+        isPan: true,  
+      );
+
+      return url;
+    } catch (e) {
+      debugPrint('Error uploading PAN card: $e');
+      rethrow;
+    } finally {
+      _isPanUploading = false;
+      _panUploadProgress = null;
+      notifyListeners();
+    }
+  }
+
+Future<bool> deletePanCard({required String userId}) async {
+    try {
+      final now = DateTime.now();
+      final dateFolder =
+          '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}';
+
+      final storage = FirebaseStorage.instanceFor(
+        bucket: AppConstants.storageBucketName,
+      );
+
+      final ref = storage.ref().child("userpics/$dateFolder/${userId}_pan_card.jpg");
+      await ref.delete();
+      
+      FloatingToast.showSimpleToast('PAN card image deleted successfully');
+      return true;
+    } catch (e) {
+      debugPrint('Error deleting PAN card image: $e');
+      FloatingToast.showSimpleToast('Failed to delete PAN card image');
+      return false;
+    }
+  }
 
   // Upload individual Aadhaar front image
   Future<String?> uploadAadhaarFront({
@@ -178,11 +239,12 @@ class UserProfileNotifier extends ChangeNotifier {
     }
   }
 
-  Future<String> _uploadFile(
+ Future<String> _uploadFile(
     FirebaseStorage storage,
     File file,
     String path, {
-    required bool isfront,
+    bool? isfront,
+    bool? isPan = false,  
   }) async {
     try {
       final ref = storage.ref().child(path);
@@ -191,22 +253,30 @@ class UserProfileNotifier extends ChangeNotifier {
         SettableMetadata(contentType: "image/jpeg"),
       );
 
-      //Listen to upload progress
+      // Listen to upload progress
       uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
         final progress = snapshot.bytesTransferred / snapshot.totalBytes;
         
-        if (isfront) {
-          _frontUploadProgress = progress;
-        } else {
-          _backUploadProgress = progress;
+        if (isfront != null) {
+          if (isfront) {
+            _frontUploadProgress = progress;
+          } else {
+            _backUploadProgress = progress;
+          }
+        } else if (isPan == true) {
+          _panUploadProgress = progress;
         }
         
         notifyListeners();
         
         if (snapshot.state == TaskState.success) {
-          FloatingToast.showSimpleToast(
-            isfront ? 'Front image uploaded successfully' : 'Back image uploaded successfully'
-          );
+          if (isfront != null) {
+            FloatingToast.showSimpleToast(
+              isfront ? 'Front image uploaded successfully' : 'Back image uploaded successfully'
+            );
+          } else if (isPan == true) {
+            FloatingToast.showSimpleToast('PAN card uploaded successfully');
+          }
         }
       });
 
