@@ -1,5 +1,7 @@
 // lib/manualpayment/manual_payment_screen.dart
+import 'dart:async';
 import 'dart:io';
+import 'package:animal_kart_demo2/manualpayment/provider/ifsc_provider.dart';
 import 'package:animal_kart_demo2/manualpayment/provider/manual_payment_provider.dart';
 import 'package:animal_kart_demo2/manualpayment/widgets/capital_convert_widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -44,6 +46,10 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
 
   bool _isUploading = false;
   bool _isDeleting = false;
+
+  Timer? _ifscDebounceTimer;
+
+  
 
   final bankAmountCtrl = TextEditingController();
   final utrCtrl = TextEditingController();
@@ -97,8 +103,78 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
     chequeBankNameCtrl.dispose();
     chequeIfscCodeCtrl.dispose();
     chequeUtrRefCtrl.dispose();
+    _ifscDebounceTimer?.cancel();
     super.dispose();
   }
+
+
+  void _onIfscChanged(String value, {bool isBankTransfer = true}) {
+    // Cancel previous timer
+    _ifscDebounceTimer?.cancel();
+    
+    // If IFSC is empty, clear bank name
+    if (value.isEmpty) {
+      if (isBankTransfer) {
+        bankNameCtrl.text = '';
+      } else {
+        chequeBankNameCtrl.text = '';
+      }
+      return;
+    }
+    
+    // Start new timer for debounce (500ms)
+    _ifscDebounceTimer = Timer(const Duration(milliseconds: 500), () {
+      if (value.length == 11) {
+        _fetchBankDetails(value, isBankTransfer: isBankTransfer);
+      } else if (value.length > 11) {
+        // If more than 11 chars, show error
+        if (isBankTransfer) {
+          bankNameCtrl.text = '';
+        } else {
+          chequeBankNameCtrl.text = '';
+        }
+      }
+    });
+  }
+  
+  Future<void> _fetchBankDetails(String ifscCode, {bool isBankTransfer = true}) async {
+    try {
+      final ifscData = await IfscService.fetchBankDetails(ifscCode);
+      
+      if (ifscData != null && mounted) {
+        // Format: "Bank Name - Branch Name"
+        final bankInfo = '${ifscData.bank} - ${ifscData.branch}';
+        
+        if (isBankTransfer) {
+          setState(() {
+            bankNameCtrl.text = bankInfo;
+          });
+        } else {
+          setState(() {
+            chequeBankNameCtrl.text = bankInfo;
+          });
+        }
+      } else {
+        // Clear if invalid IFSC
+        if (mounted) {
+          if (isBankTransfer) {
+            setState(() {
+              bankNameCtrl.text = '';
+            });
+          } else {
+            setState(() {
+              chequeBankNameCtrl.text = '';
+            });
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching bank details: $e');
+      // Don't clear existing text on error, just log it
+    }
+  }
+
+  
 
   Future<String?> _uploadFile(
     File file,
@@ -489,7 +565,7 @@ Future<void> _handleBankTransferSubmit() async {
             children: [
               Text(
 
-  context.tr("bankTransferDetails"),
+              context.tr("bankTransferDetails"),
 
 
                 style: const TextStyle(
@@ -514,20 +590,13 @@ Future<void> _handleBankTransferSubmit() async {
                 keyboardType: TextInputType.text,
                 maxLength: 22,
                 inputFormatters: [
-    UpperCaseTextFormatter(), 
-  ],
+              UpperCaseTextFormatter(), 
+            ],
 
               ),
               const SizedBox(height: 8),
 
-              ValidatedTextField(
-                controller: bankNameCtrl,
-                  label: context.tr("bankName"),
-
-                validator: BankTransferValidators.validateBankName,
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 8),
+             
 
               ValidatedTextField(
                 controller: ifscCodeCtrl,
@@ -536,12 +605,21 @@ Future<void> _handleBankTransferSubmit() async {
                 keyboardType: TextInputType.text,
                 maxLength: 11,
                 inputFormatters: [
-    UpperCaseTextFormatter(), 
-  ],
+                UpperCaseTextFormatter(), 
+                ],
+                onChanged: (value) => _onIfscChanged(value, isBankTransfer: true),
+              ),
+
+              const SizedBox(height: 8),
+               ValidatedTextField(
+                controller: bankNameCtrl,
+                label: context.tr("bankName"),
+                keyboardType: TextInputType.text,
+                readOnly: true,
               ),
               const SizedBox(height: 8),
 
-                            ValidatedTextField(
+              ValidatedTextField(
                 controller: transactionDateCtrl,
                 label: context.tr("transactionDate"),
 
@@ -729,15 +807,6 @@ Future<void> _handleBankTransferSubmit() async {
                 readOnly: true,
               ),
               const SizedBox(height: 8),
-
-              ValidatedTextField(
-                controller: chequeBankNameCtrl,
-                label: context.tr("bankName"),
-                validator: ChequePaymentValidators.validateChequeBankName,
-                keyboardType: TextInputType.text,
-              ),
-              const SizedBox(height: 8),
-
               ValidatedTextField(
                 controller: chequeIfscCodeCtrl,
                 label: context.tr("ifscCode"),
@@ -745,10 +814,23 @@ Future<void> _handleBankTransferSubmit() async {
                 keyboardType: TextInputType.text,
                 maxLength: 11,
                 inputFormatters: [
-    UpperCaseTextFormatter(), 
-  ],
-
+                UpperCaseTextFormatter(),
+                 
+              ],
+              onChanged: (value) => _onIfscChanged(value, isBankTransfer: false),
               ),
+               const SizedBox(height: 8),
+
+              ValidatedTextField(
+                controller: chequeBankNameCtrl,
+                label: context.tr("bankName"),
+                
+                keyboardType: TextInputType.text,
+                readOnly: true,
+              ),
+             
+
+              
               const SizedBox(height: 8),
 
               ValidatedTextField(
@@ -758,8 +840,8 @@ Future<void> _handleBankTransferSubmit() async {
                 keyboardType: TextInputType.text,
                 maxLength: 30,
                 inputFormatters: [
-    UpperCaseTextFormatter(), 
-  ],
+                UpperCaseTextFormatter(), 
+              ],
 
               ),
 

@@ -218,7 +218,9 @@ class ValidatedTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
   final int? maxLength;
-  final List<TextInputFormatter>? inputFormatters; 
+  final List<TextInputFormatter>? inputFormatters;
+  final void Function(String)? onChanged; // Add this
+  final bool showLoading; 
 
   const ValidatedTextField({
     Key? key,
@@ -230,6 +232,9 @@ class ValidatedTextField extends StatelessWidget {
     this.keyboardType,
     this.maxLength,
     this.inputFormatters,
+    
+    this.onChanged, // Add this
+    this.showLoading = false,
   }) : super(key: key);
 
   @override
@@ -253,6 +258,19 @@ class ValidatedTextField extends StatelessWidget {
             ),
           ),
           validator: validator,
+           onChanged: onChanged, 
+          //  decoration: InputDecoration(
+          //       suffixIcon: showLoading
+          //           ? const Padding(
+          //               padding: EdgeInsets.all(12.0),
+          //               child: SizedBox(
+          //                 width: 16,
+          //                 height: 16,
+          //                 child: CircularProgressIndicator(strokeWidth: 2),
+          //               ),
+          //             )
+          //           : suffixIcon,
+          //     ),
         ),
         const SizedBox(height: 8),
       ],
