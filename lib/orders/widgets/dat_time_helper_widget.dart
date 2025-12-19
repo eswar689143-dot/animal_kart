@@ -1,9 +1,9 @@
 String formatToIndianDateTime(DateTime? date) {
   if (date == null) return "--";
 
-  // If backend sends UTC
-  final DateTime istTime =
-      date.toUtc().add(const Duration(hours: 5, minutes: 30));
+  // Convert the DateTime to local time (IST) - Dart handles timezone conversions
+  // For UTC time, we need to add 5:30 hours to get IST
+  final DateTime istTime = date.add(const Duration(hours: 5, minutes: 30));
 
   const months = [
     "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -23,6 +23,3 @@ String formatToIndianDateTime(DateTime? date) {
 
   return "$day $month $year, $hour:$minute $amPm";
 }
-
- 
-

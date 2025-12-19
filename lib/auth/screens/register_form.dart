@@ -739,7 +739,7 @@ Future<void> _deletePanCard() async {
       'aadhar_number': aadhaarCtrl.text.trim(),
       'first_name': firstNameCtrl.text.trim(),
       "last_name": lastNameCtrl.text.trim(),
-      'pancard': panCardUrl,
+      'panCardUrl': panCardUrl,
     };
 
     if (aadhaarUrls['aadhaar_front_url'] != null) {

@@ -4,14 +4,14 @@ class UnitSelection {
   final String userId;
   final int buffaloCount;
   final int calfCount;
-  final int numUnits;
+  final double numUnits;
   final String paymentStatus;
   final String paymentMode;
-  final int baseUnitCost;
-  final int cpfUnitCost;
+  final double baseUnitCost;
+  final double cpfUnitCost;
   final bool withCpf;
-  final int unitCost;
-  final int totalCost;
+  final double unitCost;
+  final double totalCost;
   final DateTime? placedAt;
 
   UnitSelection({
@@ -33,22 +33,41 @@ class UnitSelection {
 
   factory UnitSelection.fromJson(Map<String, dynamic> json) {
     return UnitSelection(
-      id: json['id'] ?? '',
-      breedId: json['breedId'] ?? '',
-      userId: json['userId'] ?? '',
-      buffaloCount: json['buffaloCount'] ?? 0,
-      calfCount: json['calfCount'] ?? 0,
-      numUnits: json['numUnits'] ?? 0,
-      paymentStatus: json['paymentStatus'] ?? '',
-      paymentMode: json['paymentMode'] ?? '',
-      baseUnitCost: json['baseUnitCost'] ?? 0,
-      cpfUnitCost: json['cpfUnitCost'] ?? 0,
-      withCpf: json['withCpf'] ?? false,
-      unitCost: json['unitCost'] ?? 0,
-      totalCost: json['totalCost'] ?? 0,
+      id: json['id']?.toString() ?? '',
+      breedId: json['breedId']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      buffaloCount: (json['buffaloCount'] as num?)?.toInt() ?? 0,
+      calfCount: (json['calfCount'] as num?)?.toInt() ?? 0,
+      numUnits: (json['numUnits'] as num?)?.toDouble() ?? 0.0,
+      paymentStatus: json['paymentStatus']?.toString() ?? '',
+      paymentMode: json['paymentMode']?.toString() ?? '',
+      baseUnitCost: (json['baseUnitCost'] as num?)?.toDouble() ?? 0.0,
+      cpfUnitCost: (json['cpfUnitCost'] as num?)?.toDouble() ?? 0.0,
+      withCpf: json['withCpf'] as bool? ?? false,
+      unitCost: (json['unitCost'] as num?)?.toDouble() ?? 0.0,
+      totalCost: (json['totalCost'] as num?)?.toDouble() ?? 0.0,
       placedAt: json['placedAt'] != null 
-          ? DateTime.tryParse(json['placedAt']) 
+          ? DateTime.tryParse(json['placedAt'].toString()) 
           : null,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'breedId': breedId,
+      'userId': userId,
+      'buffaloCount': buffaloCount,
+      'calfCount': calfCount,
+      'numUnits': numUnits,
+      'paymentStatus': paymentStatus,
+      'paymentMode': paymentMode,
+      'baseUnitCost': baseUnitCost,
+      'cpfUnitCost': cpfUnitCost,
+      'withCpf': withCpf,
+      'unitCost': unitCost,
+      'totalCost': totalCost,
+      'placedAt': placedAt?.toIso8601String(),
+    };
   }
 }

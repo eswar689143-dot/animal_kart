@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:animal_kart_demo2/manualpayment/provider/ifsc_provider.dart';
 import 'package:animal_kart_demo2/manualpayment/provider/manual_payment_provider.dart';
 import 'package:animal_kart_demo2/manualpayment/widgets/capital_convert_widget.dart';
+import 'package:animal_kart_demo2/orders/widgets/custom_widgets.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,7 +21,7 @@ import '../widgets/payment_mode_selector.dart';
 
 
 class ManualPaymentScreen  extends ConsumerStatefulWidget  {
-  final int totalAmount;
+  final double totalAmount;
   final String unitId;
   final String userId;
   final String buffaloId;
@@ -86,8 +87,8 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
   @override
   void initState() {
     super.initState();
-    bankAmountCtrl.text = widget.totalAmount.toString();
-    chequeAmountCtrl.text = widget.totalAmount.toString();
+    bankAmountCtrl.text = FormatUtils.formatAmountWithCurrency(widget.totalAmount);
+    chequeAmountCtrl.text = FormatUtils.formatAmountWithCurrency(widget.totalAmount);
   }
 
   @override
@@ -526,7 +527,7 @@ Future<void> _handleBankTransferSubmit() async {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "${context.tr("amountToPay")}: ₹${widget.totalAmount}",
+              "${context.tr("amountToPay")}: ${FormatUtils.formatAmountWithCurrency(widget.totalAmount)}",
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),

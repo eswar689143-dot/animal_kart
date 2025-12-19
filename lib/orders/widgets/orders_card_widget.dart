@@ -1,7 +1,10 @@
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
+import 'package:animal_kart_demo2/orders/widgets/custom_widgets.dart';
+
+
 import 'package:animal_kart_demo2/orders/widgets/dat_time_helper_widget.dart';
 import 'package:animal_kart_demo2/orders/widgets/tracker_screen.dart';
-import 'package:animal_kart_demo2/utils/convert.dart';
+
 import 'package:flutter/material.dart';
 import '../models/order_model.dart';
 import '../../manualpayment/screens/manual_payment_screen.dart';
@@ -54,7 +57,7 @@ String localizedPaymentType(BuildContext context, String paymentType) {
                 context,
                 MaterialPageRoute(
                   builder: (_) => ManualPaymentScreen(
-                    totalAmount: order.totalCost,
+                    totalAmount: order.unitCost,
                     unitId: order.id,
                     userId: order.userId,
                     buffaloId: order.breedId,
@@ -99,7 +102,7 @@ String localizedPaymentType(BuildContext context, String paymentType) {
                           
                           Text(
                             //'',
-                          "${context.tr("placedOn")} : ${formatToIndianDateTime(order.userCreatedAt)}",
+                          "${context.tr("placedOn")} : ${formatToIndianDateTime(order.placedAt)}",
 
                             style: const TextStyle(
                               fontSize: 12,
@@ -110,14 +113,14 @@ String localizedPaymentType(BuildContext context, String paymentType) {
                         ],
                       ),
 
-                 if (isPaid)
-  _statusChip(context.tr("paid"), Colors.green),
+                          if (isPaid)
+                 _statusChip(context.tr("paid"), Colors.green),
 
-if (isPendingPayment)
-  _statusChip(context.tr("pending"), Colors.orange),
+          if (isPendingPayment)
+            _statusChip(context.tr("pending"), Colors.orange),
 
-if (isAdminReview)
-  _statusChip(context.tr("adminReview"), const Color(0xFF7E57C2)),
+          if (isAdminReview)
+            _statusChip(context.tr("adminReview"), const Color(0xFF7E57C2)),
 
                 ],
               ),
@@ -167,12 +170,12 @@ Padding(
             ),
             const SizedBox(height: 4),
             Text(
-  "${order.numUnits} ${order.numUnits == 1 ? context.tr("unit") : context.tr("units")} + CPF",
-  style: const TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.w700,
-  ),
-),
+            "${order.numUnits} ${order.numUnits <= 1.5 ? context.tr("unit") : context.tr("units")} + CPF",
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
 
             // Text(
             //   "${order.numUnits} ${context.tr("unit")} + CPF",
@@ -208,13 +211,13 @@ Padding(
                       ),
                     // const SizedBox(height: 4),
                       Text(
-                        "₹${_formatAmount(order.totalCost)}",
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
+                    FormatUtils.formatAmountWithCurrency(order.unitCost),
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                    ),
+                      )
+                    ]
                   ),
                 ],
               ),
@@ -244,7 +247,7 @@ Padding(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => ManualPaymentScreen(
-                                    totalAmount: order.totalCost,
+                                    totalAmount: order.unitCost,
                                     unitId: order.id,
                                     userId: order.userId,
                                     buffaloId: order.breedId,
@@ -284,11 +287,11 @@ Padding(
                             MaterialPageRoute(
                               builder: (_) => TrackerScreen(
                                 buffaloType: order.breedId, 
-                                unitCount: order.buffaloCount, 
+                                unitCount: order.buffaloCount.toDouble(), 
                                 purchaseDate: order.approvalDate.toString(), 
-                                buffaloCount: order.buffaloCount, 
-                                calfCount: order.calfCount, 
-                                totalUnitcost: order.totalCost,
+                                buffaloCount: order.buffaloCount.toDouble(), 
+                                calfCount: order.calfCount.toDouble(), 
+                                totalUnitcost: order.unitCost,
                                 
 
                                 ),
@@ -320,14 +323,14 @@ Padding(
                           color: isPaid ? Colors.green : Colors.green,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
-  localizedPaymentType(context, order.paymentType!),
-  style: const TextStyle(
-    color: Colors.white,
-    fontSize: 11,
-    fontWeight: FontWeight.w700,
-  ),
-),
+                                                child: Text(
+                          localizedPaymentType(context, order.paymentType!),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
 
 
                         
@@ -425,10 +428,9 @@ Padding(
     );
   }
 
-  static String _formatAmount(int amount) {
-    return amount.toString().replaceAllMapped(
-      RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
-      (m) => '${m[1]},',
-    );
-  }
+   
+  
 }
+
+
+

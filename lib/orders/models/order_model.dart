@@ -7,7 +7,7 @@ class OrderUnit {
   final DateTime? paymentSessionDate;
   final String breedId;
 
-  final int numUnits;
+  final double numUnits;
   final int buffaloCount;
   final int calfCount;
 
@@ -18,10 +18,10 @@ class OrderUnit {
   final DateTime placedAt;
   final DateTime? approvalDate;
 
-  final int baseUnitCost;
-  final int cpfUnitCost;
-  final int unitCost;
-  final int totalCost;
+  final double baseUnitCost;
+  final double cpfUnitCost;
+  final double unitCost;
+  final double totalCost;
 
   final bool withCpf;
   final List<BuffaloModel> buffalos;
@@ -50,48 +50,85 @@ class OrderUnit {
 
   factory OrderUnit.fromJson(Map<String, dynamic> json) {
     DateTime? parseDate(String? value) {
-      if (value == null || value.isEmpty) return null;
-      return DateTime.parse(value);
+      if (value == null || value.isEmpty || value == '') return null;
+      return DateTime.tryParse(value);
     }
 
     return OrderUnit(
-      id: json['id'] ?? '',
-      userId: json['userId'] ?? '',
-      userCreatedAt: parseDate(json['userCreatedAt']),
-      paymentSessionDate: parseDate(json['paymentSessionDate']),
-      breedId: json['breedId'] ?? '',
+      id: json['id']?.toString() ?? '',
+      userId: json['userId']?.toString() ?? '',
+      userCreatedAt: parseDate(json['userCreatedAt']?.toString()),
+      paymentSessionDate: parseDate(json['paymentSessionDate']?.toString()),
+      breedId: json['breedId']?.toString() ?? '',
 
-      numUnits: parseInt(json['numUnits']),
+      numUnits: parseDouble(json['numUnits']),
       buffaloCount: parseInt(json['buffaloCount']),
       calfCount: parseInt(json['calfCount']),
 
-      status: json['status'],
-      paymentStatus: json['paymentStatus'] ?? 'UNKNOWN',
-      paymentType: json['paymentType'],
+      status: json['status']?.toString(),
+      paymentStatus: json['paymentStatus']?.toString() ?? 'UNKNOWN',
+      paymentType: json['paymentType']?.toString(),
 
-      placedAt: DateTime.parse(json['placedAt']),
-      approvalDate: parseDate(json['approvalDate']),
+      placedAt: parseDate(json['placedAt']?.toString()) ?? DateTime.now(),
+      approvalDate: parseDate(json['approvalDate']?.toString()),
 
-      baseUnitCost: parseInt(json['baseUnitCost']),
-      cpfUnitCost: parseInt(json['cpfUnitCost']),
-      unitCost: parseInt(json['unitCost']),
-      totalCost: parseInt(json['totalCost']),
+      baseUnitCost: parseDouble(json['baseUnitCost']),
+      cpfUnitCost: parseDouble(json['cpfUnitCost']),
+      unitCost: parseDouble(json['unitCost']),
+      totalCost: parseDouble(json['totalCost']),
 
-      withCpf: json['withCpf'] ?? false,
+      withCpf: json['withCpf'] as bool? ?? false,
 
       buffalos: (json['buffalos'] as List? ?? [])
-          .map((e) => BuffaloModel.fromJson(e))
+          .map<BuffaloModel>((e) => BuffaloModel.fromJson(e))
           .toList(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userId': userId,
+      'userCreatedAt': userCreatedAt?.toIso8601String(),
+      'paymentSessionDate': paymentSessionDate?.toIso8601String(),
+      'breedId': breedId,
+      'numUnits': numUnits,
+      'buffaloCount': buffaloCount,
+      'calfCount': calfCount,
+      'status': status,
+      'paymentStatus': paymentStatus,
+      'paymentType': paymentType,
+      'placedAt': placedAt.toIso8601String(),
+      'approvalDate': approvalDate?.toIso8601String(),
+      'baseUnitCost': baseUnitCost,
+      'cpfUnitCost': cpfUnitCost,
+      'unitCost': unitCost,
+      'totalCost': totalCost,
+      'withCpf': withCpf,
+      "buffalos": (['buffalos'] as List? ?? [])
+          .map((e) => BuffaloModel.fromJson(e))
+          .toList(),
+    
+    };
+  }
 }
-
-
-
 
 int parseInt(dynamic value) {
   if (value == null) return 0;
   if (value is int) return value;
   if (value is double) return value.toInt();
-  return int.tryParse(value.toString()) ?? 0;
+  if (value is String) {
+    return double.tryParse(value)?.toInt() ?? int.tryParse(value) ?? 0;
+  }
+  return 0;
+}
+
+double parseDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is double) return value;
+  if (value is int) return value.toDouble();
+  if (value is String) {
+    return double.tryParse(value) ?? 0.0;
+  }
+  return 0.0;
 }

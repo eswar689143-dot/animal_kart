@@ -1,15 +1,16 @@
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
+import 'package:animal_kart_demo2/orders/widgets/custom_widgets.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 
 class TrackerScreen extends StatefulWidget {
   final String buffaloType;
-  final int unitCount;
+  final double unitCount;
   final String purchaseDate;
-  final int buffaloCount;
-  final int calfCount;
-  final int totalUnitcost;
+  final double buffaloCount;
+  final double calfCount;
+  final double totalUnitcost;
 
 
   const TrackerScreen({super.key,
@@ -148,19 +149,38 @@ class _TrackerScreenState extends State<TrackerScreen> {
                           const SizedBox(height: 4),
                           Row(
                             children: [
-                              _valueRow(context, "${widget.buffaloCount}", context.tr("buffalo")),
-                              const SizedBox(width: 6),
-                              _valueRow(context, "${widget.calfCount}", context.tr("calf")),
+                         _valueRow(
+                          context, 
+                          widget.buffaloCount % 1 == 0 
+                            ? widget.buffaloCount.toInt().toString() 
+                            : widget.buffaloCount.toString(),
+                          widget.buffaloCount == 1 
+                            ? context.tr("buffalo") 
+                            : context.tr("buffaloes")
+                        ),
+                        SizedBox(width: 2,),
+                              _valueRow(
+                            context,
+                            widget.calfCount % 1 == 0 
+                              ? widget.calfCount.toInt().toString() 
+                              : widget.calfCount.toString(),
+                            widget.calfCount == 1 
+                              ? context.tr("calf") 
+                              : context.tr("calves")
+                          ),
+
+                    
                             ],
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            "${widget.unitCount} ${context.tr("unit")} + CPF",
-                            style: const TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
+                      "${widget.unitCount % 1 == 0 ? widget.unitCount.toInt().toString() : widget.unitCount.toString()} "
+                      "${widget.unitCount == 1 ? context.tr("unit") : context.tr("units")} + CPF",
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                          )
                         ],
                       ),
                     ),
@@ -187,9 +207,9 @@ class _TrackerScreenState extends State<TrackerScreen> {
                             ),
                           // const SizedBox(height: 4),
                             Text(
-                              "₹${_formatAmount(widget.totalUnitcost)}",
+                              FormatUtils.formatAmount(widget.totalUnitcost),
                               style: const TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w800,
                               ),
                             ),
