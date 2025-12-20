@@ -25,7 +25,7 @@ class BuffaloDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
-  int quantity = 1; // Number of buffaloes selected
+  int quantity = 2; // Number of buffaloes selected
   bool isCpfSelected = true;
   
   
@@ -242,13 +242,14 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(
-                    "${context.tr("buffaloes")}: $totalBuffaloes, ${context.tr("calves")}: $totalCalves",
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                 Text(
+                "$totalBuffaloes ${totalBuffaloes == 1 ? context.tr("buffalo") : context.tr("buffaloes")}, "
+                "$totalCalves ${totalCalves == 1 ? context.tr("calf") : context.tr("calves")}",
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
                   const SizedBox(height: 4),
                   Text(
                     "${context.tr("units")}: ${units.toStringAsFixed(1)}",
@@ -333,7 +334,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${context.tr("pricePerBuffalo")}:",
+                "${context.tr("Buffalo Price")} :",
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               Text(
@@ -350,7 +351,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                "${context.tr("totalBuffaloPrice")}:",
+                "${context.tr("Total Price")} (${buffalo.price} X ${quantity}) :",
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
               ),
               Text(
@@ -393,100 +394,323 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
   }
 
   Widget _cpfCheckboxAndSelector(buffalo) {
-    final cpfPerBuffalo = buffalo.insurance; // This should be 13000
-    final totalCpf = cpfUnitsToPay * cpfPerBuffalo;
-    final totalBuffaloes = quantity;
+  final cpfPerBuffalo = buffalo.insurance; // This should be 13000
+  final totalCpf = cpfUnitsToPay * cpfPerBuffalo;
+  final totalBuffaloes = quantity;
+  final baseUnitCost = buffalo.price * quantity; // Total buffalo price
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F8FF),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Checkbox for CPF selection
-          Row(
-            children: [
-              Checkbox(
-                value: isCpfSelected,
-                onChanged: (value) {
-                  setState(() {
-                    isCpfSelected = value ?? false;
-                  });
-                },
-              ),
-              const SizedBox(width: 8),
-              Text(
-                context.tr("includeCpf"),
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: isCpfSelected ? Colors.black : Colors.grey,
+  return Column(
+    children: [
+      // CPF Container
+      Container(
+        margin: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F8FF),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Checkbox for CPF selection
+            Row(
+              children: [
+                Checkbox(
+                  value: isCpfSelected,
+                  onChanged: (value) {
+                    setState(() {
+                      isCpfSelected = value ?? false;
+                    });
+                  },
                 ),
+                const SizedBox(width: 8),
+                Text(
+                  context.tr("includeCpf"),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: isCpfSelected ? Colors.black : Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+
+            // Only show CPF details if checkbox is selected
+            if (isCpfSelected) ...[
+              const SizedBox(height: 8),
+              const Divider(),
+              const SizedBox(height: 8),
+
+              // CPF Breakdown Section
+              _cpfDetailRow(
+                context.tr("totalBuffaloes"),
+                "$totalBuffaloes ${totalBuffaloes == 1 ? context.tr("buffalo") : context.tr("buffaloes")}",
+              ),
+
+              _cpfDetailRow(
+                context.tr("units"),
+                "${units.toStringAsFixed(1)}",
+              ),
+
+              _cpfDetailRow(
+                "${context.tr("Free CPF discount")} (${freeCpfUnits} ${freeCpfUnits == 1 ? 'unit' : 'units'})",
+                "- ₹${freeCpfUnits * cpfPerBuffalo}",
+                valueColor: Colors.orange,
+              ),
+
+              _cpfDetailRow(
+                "${context.tr("CPF for")} ${units.toStringAsFixed(1)} ${units == 1 ? 'unit' : 'units'}",
+                "₹${totalCpf}",
+              ),
+
+              const SizedBox(height: 4),
+              const Divider(thickness: 1.5),
+              const SizedBox(height: 4),
+              _cpfDetailRow(
+                context.tr("Total CPF Cost"),
+                "₹${totalCpf}",
+                valueColor: kPrimaryDarkColor,
+                isBold: true,
+              ),
+            ],
+          ],
+        ),
+      ),
+
+      // Total Price Summary Container (Separate)
+      if (isCpfSelected) ...[
+        const SizedBox(height: 16),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: kPrimaryGreen.withOpacity(0.5), width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: kPrimaryGreen.withOpacity(0.1),
+                spreadRadius: 2,
+                blurRadius: 8,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                context.tr("Total Price Summary"),
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  decoration: TextDecoration.underline,
+                  decorationThickness: 2,
+                ),
+              ),
+              const SizedBox(height: 16),
 
-          // Only show CPF details if checkbox is selected
-          if (isCpfSelected) ...[
-            const SizedBox(height: 8),
-            const Divider(),
-            const SizedBox(height: 8),
+              _cpfDetailRow(
+                "${units.toStringAsFixed(1)} ${units == 1 ? 'Unit' : 'Units'} ${context.tr("Price")}",
+                "₹${baseUnitCost}",
+              ),
 
-            Text(
-              context.tr("cpfSelection"),
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
+              _cpfDetailRow(
+                "${units.toStringAsFixed(1)} ${units == 1 ? 'Unit' : 'Units'} ${context.tr("CPF Cost")}",
+                "₹${totalCpf}",
+              ),
 
-            const SizedBox(height: 10),
+              const SizedBox(height: 12),
+              const Divider(thickness: 2),
+              const SizedBox(height: 12),
 
-            // CPF details with calculation explanation
-            _cpfDetailRow(
-              context.tr("totalBuffaloes"),
-              "$totalBuffaloes ${context.tr("buffaloes")}",
-            ),
+              _cpfDetailRow(
+                context.tr("Total Price"),
+                "₹${baseUnitCost + totalCpf}",
+                valueColor: kPrimaryGreen,
+                isBold: true,
+                fontSize: 19,
+              ),
 
-            _cpfDetailRow(
-              context.tr("units"),
-              "${units.toStringAsFixed(1)}",
-            ),
+              // More Details Section
+              ExpansionTile(
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.symmetric(vertical: 2),
+                title: Text(
+                  context.tr("More Details"),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Buffalo Price Breakdown
+                        Text(
+                          "Buffalo Price Breakdown:",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.blue.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _detailCalculationRow(
+                          "Number of Buffaloes",
+                          "$quantity",
+                        ),
+                        _detailCalculationRow(
+                          "Price per Buffalo",
+                          "₹${buffalo.price}",
+                        ),
+                        _detailCalculationRow(
+                          "Total Buffalo Price",
+                          "₹${buffalo.price} × $quantity = ₹${baseUnitCost}",
+                          isBold: true,
+                          valueColor: Colors.blue.shade700,
+                        ),
+                        
+                        const Divider(height: 20),
+                        
+                        // CPF Breakdown
+                        Text(
+                          "CPF Breakdown:",
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.orange.shade800,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _detailCalculationRow(
+                          "Total Units",
+                          "${units.toStringAsFixed(1)} ($quantity buffaloes × 0.5)",
+                        ),
+                        _detailCalculationRow(
+                          "CPF per Unit",
+                          "₹${cpfPerBuffalo}",
+                        ),
+                        _detailCalculationRow(
+                          "CPF Units to Pay",
+                          "$quantity ${quantity == 1 ? 'buffalo' : 'buffaloes'}",
+                        ),
+                        _detailCalculationRow(
+                          "Free CPF Units",
+                          "$freeCpfUnits ${freeCpfUnits == 1 ? 'unit' : 'units'} (₹${freeCpfUnits * cpfPerBuffalo})",
+                          valueColor: Colors.orange,
+                        ),
+                        _detailCalculationRow(
+                          "Total CPF Cost",
+                          "₹${cpfPerBuffalo} × $cpfUnitsToPay = ₹${totalCpf}",
+                          isBold: true,
+                          valueColor: Colors.orange.shade700,
+                        ),
+                        
+                        const Divider(height: 20),
+                        
+                        // Grand Total
+                        _detailCalculationRow(
+                          "Grand Total",
+                          "₹${baseUnitCost} + ₹${totalCpf} = ₹${baseUnitCost + totalCpf}",
+                          isBold: true,
+                          valueColor: kPrimaryGreen,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    ],
+  );
+}
 
-           
-
-            
-
-           
-          ],
-        ],
-      )
-    );
-  }
-
-  Widget _cpfDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
+Widget _cpfDetailRow(
+  String label,
+  String value, {
+  Color? valueColor,
+  bool isBold = false,
+  double fontSize = 14,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(
+          child: Text(
             label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: kPrimaryGreen,
+            style: TextStyle(
+              fontSize: fontSize,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w500,
             ),
           ),
-        ],
-      ),
-    );
-  }
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            color: valueColor ?? kPrimaryGreen,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _detailCalculationRow(
+  String label,
+  String value, {
+  bool isBold = false,
+  Color? valueColor,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 2,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.w600 : FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          flex: 3,
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isBold ? FontWeight.w700 : FontWeight.w600,
+              color: valueColor ?? Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
 
   Widget _paymentSection(BuildContext context, buffalo, int totalAmount) {
     return Container(
@@ -657,6 +881,49 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
       ),
     );
   }
+
+
+Widget _priceSummaryRow(
+  String label,
+  String value, {
+  bool isBold = false,
+  bool isTotal = false,
+  bool isInfo = false,
+  bool showStrikethrough = false,
+  Color? valueColor,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: isTotal ? 16 : 14,
+              fontWeight: isBold || isTotal ? FontWeight.w700 : FontWeight.w500,
+              color: isTotal ? kPrimaryDarkColor : Colors.black87,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isTotal ? 17 : 14,
+            fontWeight: isBold || isTotal ? FontWeight.w700 : FontWeight.w600,
+            color: valueColor ?? (isTotal ? kPrimaryGreen : Colors.black87),
+            decoration: showStrikethrough ? TextDecoration.lineThrough : null,
+            decorationColor: Colors.red,
+            decorationThickness: 2,
+          ),
+        ),
+      ],
+    ),
+  );
+}
 }
 
 

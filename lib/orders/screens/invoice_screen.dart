@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:animal_kart_demo2/orders/widgets/custom_widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -129,8 +130,8 @@ class InvoiceGenerator {
                       "Buffalos: ${order.buffaloCount}\n"
                       "Calves: ${order.calfCount}",
                       order.numUnits.toString(),
-                      formatAmount(order.baseUnitCost),
-                      formatAmount(order.baseUnitCost * order.numUnits),
+                      FormatUtils.formatAmount(order.baseUnitCost),
+                      FormatUtils.formatAmount(order.unitCost),
                     ),
 
 
@@ -139,8 +140,8 @@ class InvoiceGenerator {
                       buildRow(
                         "CPF Amount",
                         order.numUnits.toString(), 
-                        formatAmount(order.cpfUnitCost), 
-                        formatAmount(order.cpfUnitCost * order.numUnits), 
+                        FormatUtils.formatAmount(order.cpfUnitCost), 
+                        FormatUtils.formatAmount(order.cpfUnitCost * order.numUnits), 
                       ),
 
 
@@ -157,14 +158,14 @@ class InvoiceGenerator {
                       children: [
                         _priceRow(
                           "Subtotal",
-                          formatAmount(order.baseUnitCost * order.numUnits),
+                          FormatUtils.formatAmount(order.baseUnitCost * order.numUnits),
                         ),
 
 
                         if (order.withCpf)
                           _priceRow(
                             "CPF (${order.numUnits}x)",
-                            formatAmount(order.cpfUnitCost * order.numUnits),
+                            FormatUtils.formatAmount(order.cpfUnitCost * order.numUnits),
                           ),
 
 
@@ -172,7 +173,7 @@ class InvoiceGenerator {
 
                         _priceRow(
                           "Total",
-                          formatAmount(order.totalCost),
+                          FormatUtils.formatAmount(order.totalCost),
                           bold: true,
                         ),
 
@@ -329,10 +330,6 @@ static pw.Widget _termsAndConditions() {
 
 
 
-String formatAmount(int value) {
-  final formatted = NumberFormat('#,##,###', 'en_IN').format(value);
-  return 'Rs $formatted';
-}
 
 
 String formatOrderDate(DateTime? date) {
@@ -340,4 +337,6 @@ String formatOrderDate(DateTime? date) {
 
   return DateFormat('dd MMM yyyy, hh:mm a').format(date);
 }
+
+
 
