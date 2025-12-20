@@ -30,7 +30,10 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
   
   
   double get units => quantity * 0.5;
-  
+  String get unitText {
+  return units <= 1 ? context.tr("unit") : context.tr("units");
+}
+
   
   int get cpfUnitsToPay {
     if (!isCpfSelected) return 0;
@@ -235,7 +238,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${context.tr("Qunatity")}: $quantity",
+                    "${context.tr("Quantity")}: $quantity",
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -252,7 +255,9 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
               ),
                   const SizedBox(height: 4),
                   Text(
-                    "${context.tr("units")}: ${units.toStringAsFixed(1)}",
+                    "${units.toStringAsFixed(1)} $unitText",
+
+                    //"${context.tr("units")}: ${units.toStringAsFixed(1)}",
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -417,11 +422,12 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
               children: [
                 Checkbox(
                   value: isCpfSelected,
-                  onChanged: (value) {
-                    setState(() {
-                      isCpfSelected = value ?? false;
-                    });
-                  },
+                  onChanged: null, 
+                  // onChanged: (value) {
+                  //   setState(() {
+                  //     isCpfSelected = value ?? false;
+                  //   });
+                  // },
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -459,7 +465,9 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
               ),
 
               _cpfDetailRow(
-                "${context.tr("CPF for")} ${units.toStringAsFixed(1)} ${units == 1 ? 'unit' : 'units'}",
+                  "${context.tr("CPF for")} ${units.toStringAsFixed(1)} $unitText",
+
+                //"${context.tr("CPF for")} ${units.toStringAsFixed(1)} ${units == 1 ? 'unit' : 'units'}",
                 "₹${totalCpf}",
               ),
 
@@ -511,12 +519,16 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
               const SizedBox(height: 16),
 
               _cpfDetailRow(
-                "${units.toStringAsFixed(1)} ${units == 1 ? 'Unit' : 'Units'} ${context.tr("Price")}",
+                "${units.toStringAsFixed(1)} $unitText ${context.tr("Price")}",
+
+              //  "${units.toStringAsFixed(1)} ${units == 1 ? 'Unit' : 'Units'} ${context.tr("Price")}",
                 "₹${baseUnitCost}",
               ),
 
               _cpfDetailRow(
-                "${units.toStringAsFixed(1)} ${units == 1 ? 'Unit' : 'Units'} ${context.tr("CPF Cost")}",
+                "${units.toStringAsFixed(1)} $unitText ${context.tr("CPF Cost")}",
+
+               // "${units.toStringAsFixed(1)} ${units == 1 ? 'Unit' : 'Units'} ${context.tr("CPF Cost")}",
                 "₹${totalCpf}",
               ),
 
@@ -604,7 +616,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
                           "$quantity ${quantity == 1 ? 'buffalo' : 'buffaloes'}",
                         ),
                         _detailCalculationRow(
-                          "Free CPF Units",
+                          "Free CPF",
                           "$freeCpfUnits ${freeCpfUnits == 1 ? 'unit' : 'units'} (₹${freeCpfUnits * cpfPerBuffalo})",
                           valueColor: Colors.orange,
                         ),
