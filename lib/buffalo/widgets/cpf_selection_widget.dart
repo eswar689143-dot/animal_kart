@@ -1,4 +1,4 @@
-import 'package:animal_kart_demo2/buffalo/widgets/payment_summary.dart';
+
 import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
@@ -105,20 +105,20 @@ class CpfSelectionWidget extends StatelessWidget {
           ),
         ),
 
-        if (isCpfSelected) ...[
-          const SizedBox(height: 16),
-          PaymentSummary(
-            buffalo: buffalo,
-            quantity: quantity,
-            units: units,
-            unitText: unitText,
-            buffaloPrice: buffaloPrice,
-            cpfAmount: cpfAmount,
-            totalAmount: totalAmount,
-            cpfUnitsToPay: cpfUnitsToPay,
-            freeCpfUnits: freeCpfUnits,
-          ),
-        ],
+        // if (isCpfSelected) ...[
+        //   const SizedBox(height: 16),
+        //   PaymentSummary(
+        //     buffalo: buffalo,
+        //     quantity: quantity,
+        //     units: units,
+        //     unitText: unitText,
+        //     buffaloPrice: buffaloPrice,
+        //     cpfAmount: cpfAmount,
+        //     totalAmount: totalAmount,
+        //     cpfUnitsToPay: cpfUnitsToPay,
+        //     freeCpfUnits: freeCpfUnits,
+        //   ),
+        // ],
       ],
     );
   }

@@ -148,6 +148,7 @@ class BuffaloCard extends ConsumerWidget {
                         const SizedBox(width: 12),
 
                      OutlinedButton.icon(
+                     
                         onPressed: isCpfAvailable
                             ? () => _showInsuranceInfo(
                                   context,
@@ -304,8 +305,7 @@ class BuffaloCard extends ConsumerWidget {
       insurance: insurance,
       showCancelIcon:true,
       showNote:true,
-      isDragShowIcon:true
-
+      isDragShowIcon:true, quantity: 2,
     ),
     );
   }

@@ -92,15 +92,18 @@ class QuantitySelector extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    "${units.toStringAsFixed(1)} $unitText",
+                     "${units.toStringAsFixed(1)} $unitText",
                     style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.blue,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color:kPrimaryGreen,
+                      letterSpacing: 0.5
                     ),
                   ),
+                  
                 ],
               ),
+              
               
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -157,8 +160,45 @@ class QuantitySelector extends StatelessWidget {
               ),
             ],
           ),
+           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '* ',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: kPrimaryGreen,
+                  height: 1.4,
+                ),
+              ),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade700,
+                      height: 1.4,
+                    ),
+                    children: [
+                      TextSpan(text: 'Free '),
+                      TextSpan(
+                        text: '1-year CPF coverage',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: kPrimaryGreen,
+                        ),
+                      ),
+                      TextSpan(text: ' for 2nd buffalo with each unit'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 5),
           const Divider(),
           const SizedBox(height: 8),
           

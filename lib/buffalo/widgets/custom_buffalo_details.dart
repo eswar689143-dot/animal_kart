@@ -102,7 +102,10 @@ Widget cpfExplanationCard(BuildContext context, buffalo) {
           const SizedBox(height: 14),
 
           cpfPoint(context.tr('cpf_point1')),
-          cpfPoint(context.tr('cpf_point2')),
+           cpfPoint(
+            context.tr('cpf_free_note'),
+            isHighlight: true,
+          ),
 
           cpfPoint(
             "${context.tr('total_investment_value')} "
@@ -126,10 +129,7 @@ Widget cpfExplanationCard(BuildContext context, buffalo) {
 
           const Divider(height: 25),
 
-          cpfPoint(
-            context.tr('cpf_free_note'),
-            isHighlight: true,
-          ),
+         
            cpfPoint(
             context.tr('cpf_warn_note'),
             isHighlight: true,

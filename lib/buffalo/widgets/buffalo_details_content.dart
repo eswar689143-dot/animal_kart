@@ -75,6 +75,7 @@ class BuffaloDetailsContent extends StatelessWidget {
           InsuranceSheet(
             price: buffalo.price,
             insurance: buffalo.insurance,
+            quantity: quantity,
             showCancelIcon: false,
             showNote: false,
             isDragShowIcon: false,
@@ -101,39 +102,5 @@ class BuffaloDetailsContent extends StatelessWidget {
     );
   }
 
-  Widget _buildCpfExplanationCard(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFE8F8FF),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade100, width: 1),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.info_outline, color: Colors.blue, size: 20),
-              const SizedBox(width: 8),
-              Text(
-                context.tr("cpfNote"),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            context.tr("cpfInfo"),
-            style: const TextStyle(fontSize: 12, color: Colors.black54),
-          ),
-        ],
-      ),
-    );
-  }
+  
 }
