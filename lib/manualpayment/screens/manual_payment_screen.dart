@@ -11,11 +11,13 @@ import 'package:animal_kart_demo2/l10n/app_localizations.dart';
 import 'package:animal_kart_demo2/manualpayment/widgets/payment_mode_selector.dart';
 import 'package:animal_kart_demo2/routes/routes.dart';
 import 'package:animal_kart_demo2/utils/app_colors.dart';
+import 'package:animal_kart_demo2/utils/image_compressor_helper.dart';
 import 'package:animal_kart_demo2/widgets/floating_toast.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+
 
 class ManualPaymentScreen extends ConsumerStatefulWidget {
   final double totalAmount;
@@ -45,6 +47,7 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
   bool _isUploading = false;
   bool _isDeleting = false;
   Timer? _ifscDebounceTimer;
+  bool _isCompressing = false;
 
   // Bank Transfer Controllers
   final bankAmountCtrl = TextEditingController();
@@ -231,13 +234,63 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
     }
   }
 
+  Future<File?> _pickAndCompressImage(bool isCamera) async {
+    try {
+      final picked = await ImagePicker().pickImage(
+        source: isCamera ? ImageSource.camera : ImageSource.gallery,
+        imageQuality: 85, 
+        maxWidth: 1920, 
+        maxHeight: 1920,
+      );
+      
+      if (picked == null) return null;
+      
+      final originalFile = File(picked.path);
+      
+     
+      final originalSize = await originalFile.length() / 1024;
+     
+      
+      if (originalSize > 1024) {
+        FloatingToast.showSimpleToast("Compressing large image...");
+      }
+      
+     
+      final compressedFile = await ImageCompressionHelper.getCompressedImageIfNeeded(
+        originalFile,
+        isDocument: true,
+      );
+      
+      final compressedSize = await compressedFile.length() / 1024;
+      final reduction = ((originalSize - compressedSize) / originalSize * 100);
+      
+    
+      return compressedFile;
+      
+    } catch (e) {
+     
+      FloatingToast.showSimpleToast("Failed to process image");
+      return null;
+    }
+  }
+
   Future<void> _handleImageUpload({
     required bool isCamera,
     required bool isBankScreenshot,
     required bool isChequeFront,
     required bool isChequeBack,
   }) async {
-    final file = await pickImage(isCamera);
+    // Show compression indicator
+    if (mounted) {
+      setState(() => _isCompressing = true);
+    }
+    
+    final file = await _pickAndCompressImage(isCamera);
+    
+    if (mounted) {
+      setState(() => _isCompressing = false);
+    }
+    
     if (file == null) return;
 
     if (isBankScreenshot) {
@@ -304,13 +357,6 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
     }
   }
 
-  Future<File?> pickImage(bool isCamera) async {
-    final picked = await ImagePicker().pickImage(
-      source: isCamera ? ImageSource.camera : ImageSource.gallery,
-    );
-    return picked != null ? File(picked.path) : null;
-  }
-
   Future<void> _handleBankTransferSubmit() async {
     if (!_bankFormKey.currentState!.validate()) return;
 
@@ -323,6 +369,11 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
     final dateError = _validateTransactionDate(transactionDateCtrl.text, transferMode);
     if (dateError != null) {
       FloatingToast.showSimpleToast(dateError);
+      return;
+    }
+
+    if (_isCompressing) {
+      FloatingToast.showSimpleToast("Please wait for image compression to complete");
       return;
     }
 
@@ -380,6 +431,11 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
       hasError = true;
     }
     if (hasError) return;
+
+    if (_isCompressing) {
+      FloatingToast.showSimpleToast("Please wait for image compression to complete");
+      return;
+    }
 
     if (chequeFrontProgress != null || chequeBackProgress != null) {
       FloatingToast.showSimpleToast("Please wait for image upload to complete");
@@ -484,7 +540,10 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
             ? bankScreenshotProgress != null
             : (chequeFrontProgress != null || chequeBackProgress != null);
 
-        final bool shouldDisable = controller.isLoading || isUploadInProgress || _isDeleting;
+        final bool shouldDisable = controller.isLoading || 
+            isUploadInProgress || 
+            _isDeleting || 
+            _isCompressing;
 
         return SizedBox(
           width: double.infinity,
@@ -497,181 +556,211 @@ class _ManualPaymentScreenState extends ConsumerState<ManualPaymentScreen> {
               backgroundColor: shouldDisable ? Colors.grey : kPrimaryGreen,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
             ),
-            child: controller.isLoading
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
+            child: _isCompressing
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        context.tr("compressing"),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   )
-                : Text(
-                    context.tr("submit"),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                : controller.isLoading
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        context.tr("submit"),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
           ),
         );
       },
     );
   }
 
+ 
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kFieldBg,
-      appBar: AppBar(
-        title: Text(context.tr("manualPayment")),
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "${context.tr("amountToPay")}: ${FormatUtils.formatAmountWithCurrency(widget.totalAmount)}",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: kFieldBg,
+          appBar: AppBar(
+            title: Text(context.tr("manualPayment")),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () => Navigator.pop(context),
             ),
-            const SizedBox(height: 20),
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${context.tr("amountToPay")}: ${FormatUtils.formatAmountWithCurrency(widget.totalAmount)}",
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
 
-            PaymentModeSelector(
-              isBankSelected: showBankForm,
-              isChequeSelected: showChequeForm,
-              onBankSelected: () => setState(() {
-                showBankForm = true;
-                showChequeForm = false;
-              }),
-              onChequeSelected: () => setState(() {
-                showChequeForm = true;
-                showBankForm = false;
-              }),
+                PaymentModeSelector(
+                  isBankSelected: showBankForm,
+                  isChequeSelected: showChequeForm,
+                  onBankSelected: () => setState(() {
+                    showBankForm = true;
+                    showChequeForm = false;
+                  }),
+                  onChequeSelected: () => setState(() {
+                    showChequeForm = true;
+                    showBankForm = false;
+                  }),
+                ),
+                const SizedBox(height: 20),
+
+                if (showBankForm)
+                  BankTransferForm(
+                    formKey: _bankFormKey,
+                    bankAmountCtrl: bankAmountCtrl,
+                    utrCtrl: utrCtrl,
+                    bankNameCtrl: bankNameCtrl,
+                    ifscCodeCtrl: ifscCodeCtrl,
+                    transactionDateCtrl: transactionDateCtrl,
+                    transferMode: transferMode,
+                    transferModes: transferModes,
+                    ifscError: ifscErrorBankTransfer,
+                    bankScreenshot: bankScreenshot,
+                    bankScreenshotError: bankScreenshotError,
+                    bankScreenshotProgress: bankScreenshotProgress,
+                    onIfscChanged: (value) => _onIfscChanged(value, isBankTransfer: true),
+                    onTransferModeChanged: (newValue) => setState(() => transferMode = newValue),
+                    onCameraPressed: () => _handleImageUpload(
+                      isCamera: true,
+                      isBankScreenshot: true,
+                      isChequeFront: false,
+                      isChequeBack: false,
+                    ),
+                    onGalleryPressed: () => _handleImageUpload(
+                      isCamera: false,
+                      isBankScreenshot: true,
+                      isChequeFront: false,
+                      isChequeBack: false,
+                    ),
+                    onRemoveImage: () {
+                      if (bankScreenshotPath != null) {
+                        _deleteFile(bankScreenshotPath!);
+                      }
+                      setState(() {
+                        bankScreenshot = null;
+                        bankScreenshotError = null;
+                        bankScreenshotUrl = null;
+                        bankScreenshotPath = null;
+                        bankScreenshotProgress = null;
+                      });
+                    },
+                    validateTransactionDate: (value) => _validateTransactionDate(value, transferMode),
+                    getDatePickerConstraints: _getDatePickerConstraints,
+                    buildSubmitButton: () => _buildSubmitButton(isFormBank: true),
+                  ),
+
+                if (showChequeForm)
+                  ChequePaymentForm(
+                    formKey: _chequeFormKey,
+                    chequeNoCtrl: chequeNoCtrl,
+                    chequeDateCtrl: chequeDateCtrl,
+                    chequeAmountCtrl: chequeAmountCtrl,
+                    chequeBankNameCtrl: chequeBankNameCtrl,
+                    chequeIfscCodeCtrl: chequeIfscCodeCtrl,
+                    chequeUtrRefCtrl: chequeUtrRefCtrl,
+                    ifscError: ifscErrorCheque,
+                    chequeFrontImage: chequeFrontImage,
+                    chequeBackImage: chequeBackImage,
+                    chequeFrontImageError: chequeFrontImageError,
+                    chequeBackImageError: chequeBackImageError,
+                    chequeFrontProgress: chequeFrontProgress,
+                    chequeBackProgress: chequeBackProgress,
+                    onIfscChanged: (value) => _onIfscChanged(value, isBankTransfer: false),
+                    onCameraFrontPressed: () => _handleImageUpload(
+                      isCamera: true,
+                      isBankScreenshot: false,
+                      isChequeFront: true,
+                      isChequeBack: false,
+                    ),
+                    onGalleryFrontPressed: () => _handleImageUpload(
+                      isCamera: false,
+                      isBankScreenshot: false,
+                      isChequeFront: true,
+                      isChequeBack: false,
+                    ),
+                    onCameraBackPressed: () => _handleImageUpload(
+                      isCamera: true,
+                      isBankScreenshot: false,
+                      isChequeFront: false,
+                      isChequeBack: true,
+                    ),
+                    onGalleryBackPressed: () => _handleImageUpload(
+                      isCamera: false,
+                      isBankScreenshot: false,
+                      isChequeFront: false,
+                      isChequeBack: true,
+                    ),
+                    onRemoveFrontImage: () {
+                      if (chequeFrontPath != null) {
+                        _deleteFile(chequeFrontPath!);
+                      }
+                      setState(() {
+                        chequeFrontImage = null;
+                        chequeFrontImageError = null;
+                        chequeFrontUrl = null;
+                        chequeFrontPath = null;
+                        chequeFrontProgress = null;
+                      });
+                    },
+                    onRemoveBackImage: () {
+                      if (chequeBackPath != null) {
+                        _deleteFile(chequeBackPath!);
+                      }
+                      setState(() {
+                        chequeBackImage = null;
+                        chequeBackImageError = null;
+                        chequeBackUrl = null;
+                        chequeBackPath = null;
+                        chequeBackProgress = null;
+                      });
+                    },
+                    buildSubmitButton: () => _buildSubmitButton(isFormBank: false),
+                  ),
+              ],
             ),
-            const SizedBox(height: 20),
-
-            if (showBankForm)
-              BankTransferForm(
-                formKey: _bankFormKey,
-                bankAmountCtrl: bankAmountCtrl,
-                utrCtrl: utrCtrl,
-                bankNameCtrl: bankNameCtrl,
-                ifscCodeCtrl: ifscCodeCtrl,
-                transactionDateCtrl: transactionDateCtrl,
-                transferMode: transferMode,
-                transferModes: transferModes,
-                ifscError: ifscErrorBankTransfer,
-                bankScreenshot: bankScreenshot,
-                bankScreenshotError: bankScreenshotError,
-                bankScreenshotProgress: bankScreenshotProgress,
-                onIfscChanged: (value) => _onIfscChanged(value, isBankTransfer: true),
-                onTransferModeChanged: (newValue) => setState(() => transferMode = newValue),
-                onCameraPressed: () => _handleImageUpload(
-                  isCamera: true,
-                  isBankScreenshot: true,
-                  isChequeFront: false,
-                  isChequeBack: false,
-                ),
-                onGalleryPressed: () => _handleImageUpload(
-                  isCamera: false,
-                  isBankScreenshot: true,
-                  isChequeFront: false,
-                  isChequeBack: false,
-                ),
-                onRemoveImage: () {
-                  if (bankScreenshotPath != null) {
-                    _deleteFile(bankScreenshotPath!);
-                  }
-                  setState(() {
-                    bankScreenshot = null;
-                    bankScreenshotError = null;
-                    bankScreenshotUrl = null;
-                    bankScreenshotPath = null;
-                    bankScreenshotProgress = null;
-                  });
-                },
-                validateTransactionDate: (value) => _validateTransactionDate(value, transferMode),
-                getDatePickerConstraints: _getDatePickerConstraints,
-                buildSubmitButton: () => _buildSubmitButton(isFormBank: true),
-              ),
-
-            if (showChequeForm)
-              ChequePaymentForm(
-                formKey: _chequeFormKey,
-                chequeNoCtrl: chequeNoCtrl,
-                chequeDateCtrl: chequeDateCtrl,
-                chequeAmountCtrl: chequeAmountCtrl,
-                chequeBankNameCtrl: chequeBankNameCtrl,
-                chequeIfscCodeCtrl: chequeIfscCodeCtrl,
-                chequeUtrRefCtrl: chequeUtrRefCtrl,
-                ifscError: ifscErrorCheque,
-                chequeFrontImage: chequeFrontImage,
-                chequeBackImage: chequeBackImage,
-                chequeFrontImageError: chequeFrontImageError,
-                chequeBackImageError: chequeBackImageError,
-                chequeFrontProgress: chequeFrontProgress,
-                chequeBackProgress: chequeBackProgress,
-                onIfscChanged: (value) => _onIfscChanged(value, isBankTransfer: false),
-                onCameraFrontPressed: () => _handleImageUpload(
-                  isCamera: true,
-                  isBankScreenshot: false,
-                  isChequeFront: true,
-                  isChequeBack: false,
-                ),
-                onGalleryFrontPressed: () => _handleImageUpload(
-                  isCamera: false,
-                  isBankScreenshot: false,
-                  isChequeFront: true,
-                  isChequeBack: false,
-                ),
-                onCameraBackPressed: () => _handleImageUpload(
-                  isCamera: true,
-                  isBankScreenshot: false,
-                  isChequeFront: false,
-                  isChequeBack: true,
-                ),
-                onGalleryBackPressed: () => _handleImageUpload(
-                  isCamera: false,
-                  isBankScreenshot: false,
-                  isChequeFront: false,
-                  isChequeBack: true,
-                ),
-                onRemoveFrontImage: () {
-                  if (chequeFrontPath != null) {
-                    _deleteFile(chequeFrontPath!);
-                  }
-                  setState(() {
-                    chequeFrontImage = null;
-                    chequeFrontImageError = null;
-                    chequeFrontUrl = null;
-                    chequeFrontPath = null;
-                    chequeFrontProgress = null;
-                  });
-                },
-                onRemoveBackImage: () {
-                  if (chequeBackPath != null) {
-                    _deleteFile(chequeBackPath!);
-                  }
-                  setState(() {
-                    chequeBackImage = null;
-                    chequeBackImageError = null;
-                    chequeBackUrl = null;
-                    chequeBackPath = null;
-                    chequeBackProgress = null;
-                  });
-                },
-                buildSubmitButton: () => _buildSubmitButton(isFormBank: false),
-              ),
-          ],
+          ),
         ),
-      ),
+        // _buildCompressionProgressOverlay(),
+      ],
     );
   }
 }

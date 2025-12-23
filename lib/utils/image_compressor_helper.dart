@@ -20,11 +20,11 @@ class ImageCompressionHelper {
       final originalSize = await imageFile.length();
       final originalSizeKB = originalSize / 1024;
       
-      print('📷 Original image: ${originalSizeKB.toStringAsFixed(2)} KB');
+
       
      
       if (originalSizeKB <= _maxTargetSizeKB) {
-        print('✅ Already under 250KB, no compression needed');
+      
         return imageFile;
       }
       
@@ -33,9 +33,7 @@ class ImageCompressionHelper {
       final isPng = fileExtension == '.png';
       
      
-      if (isPng) {
-        print('ℹ️ PNG detected - converting to JPEG for better compression');
-      }
+
       
       // Start with conservative settings for documents
       int quality = isDocument ? 80 : 70;
@@ -47,7 +45,7 @@ class ImageCompressionHelper {
       
       // Iterative compression to find optimal settings
       for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-        print('🔄 Attempt $attempt: Quality=$quality, MaxWidth=$maxWidth');
+
         
         compressedFile = await _compressWithSettings(
           currentFile,
@@ -63,12 +61,11 @@ class ImageCompressionHelper {
         
         final compressedSize = await compressedFile.length();
         final compressedSizeKB = compressedSize / 1024;
-        
-        print('   Size after attempt $attempt: ${compressedSizeKB.toStringAsFixed(2)} KB');
+       
         
         // Success condition
         if (compressedSizeKB <= _maxTargetSizeKB) {
-          print('🎉 Compression successful! Final: ${compressedSizeKB.toStringAsFixed(2)} KB');
+         
           
           // Verify image is still readable
           if (isDocument) {
@@ -116,17 +113,13 @@ class ImageCompressionHelper {
       
       // Return the best we could do
       final finalSize = await compressedFile!.length() / 1024;
-      print('⚠️ Best effort: ${finalSize.toStringAsFixed(2)} KB (target: $_maxTargetSizeKB KB)');
-      
-      if (isDocument && finalSize > _maxTargetSizeKB * 1.2) {
-        print('⚠️ Warning: Document image may have reduced readability');
-      }
-      
+
+
       return compressedFile!;
       
     } catch (e) {
-      print('❌ Error compressing image: $e');
-      // Return original if compression fails completely
+      
+     
       return imageFile;
     }
   }
@@ -170,7 +163,7 @@ class ImageCompressionHelper {
       return compressedFile != null ? File(compressedFile.path) : null;
       
     } catch (e) {
-      print('Error in _compressWithSettings: $e');
+     
       return null;
     }
   }
@@ -184,12 +177,11 @@ class ImageCompressionHelper {
       final originalSize = await imageFile.length();
       final originalSizeKB = originalSize / 1024;
       
-      print('📊 Smart compression - Original: ${originalSizeKB.toStringAsFixed(2)} KB');
-      
+
       // Preset strategies based on original size
       if (originalSizeKB <= 300) {
         // Already close to target - minimal compression
-        print('🟢 Minimal compression needed');
+      
         return await _compressWithSettings(
           imageFile,
           quality: 85,
@@ -199,7 +191,7 @@ class ImageCompressionHelper {
         
       } else if (originalSizeKB <= 1024) {
         // 300KB - 1MB range
-        print('🟡 Moderate compression');
+      
         return await _compressWithSettings(
           imageFile,
           quality: isDocument ? 75 : 65,
@@ -209,7 +201,7 @@ class ImageCompressionHelper {
         
       } else if (originalSizeKB <= 2048) {
         // 1MB - 2MB range
-        print('🟠 High compression needed');
+       
         return await _compressWithSettings(
           imageFile,
           quality: isDocument ? 65 : 55,
@@ -218,15 +210,15 @@ class ImageCompressionHelper {
         ) ?? imageFile;
         
       } else {
-        // >2MB - use iterative method
-        print('🔴 Large image, using iterative compression');
+       
+       
         return await compressDocumentImage(
           imageFile: imageFile,
           isDocument: isDocument,
         );
       }
     } catch (e) {
-      print('Error in smartCompressImage: $e');
+     
       return imageFile;
     }
   }
@@ -237,21 +229,16 @@ class ImageCompressionHelper {
       final size = await compressedFile.length() / 1024;
       final fileExtension = path.extension(compressedFile.path).toLowerCase();
       
-      print('🔍 Image verification:');
-      print('   Size: ${size.toStringAsFixed(2)} KB');
-      print('   Format: $fileExtension');
-      print('   Path: ${compressedFile.path}');
+
       
       // Check if file exists and has content
       final exists = await compressedFile.exists();
       if (!exists) {
-        print('❌ Compressed file does not exist!');
+       
       }
       
       // Basic validation - file should not be 0 bytes
-      if (size < 5) {
-        print('⚠️ Warning: Compressed file is very small (<5KB)');
-      }
+     
     } catch (e) {
       print('Error verifying image: $e');
     }
@@ -264,13 +251,11 @@ class ImageCompressionHelper {
       final sizeInKB = length / 1024;
       final needs = sizeInKB > maxSizeKB;
       
-      if (needs) {
-        print('⚡ Needs compression: ${sizeInKB.toStringAsFixed(2)} KB > $maxSizeKB KB');
-      }
+     
       
       return needs;
     } catch (e) {
-      print('Error checking compression need: $e');
+    
       return false;
     }
   }
@@ -281,10 +266,7 @@ class ImageCompressionHelper {
     int maxSizeKB = 250,
     bool isDocument = true,
   }) async {
-    print('\n=== IMAGE COMPRESSION STARTED ===');
-    print('📁 File: ${path.basename(imageFile.path)}');
-    print('📄 Document type: ${isDocument ? "Aadhar/Pan card" : "Regular photo"}');
-    print('🎯 Target size: <$maxSizeKB KB\n');
+   
     
     if (await needsCompression(imageFile, maxSizeKB: maxSizeKB)) {
       return await smartCompressImage(
@@ -293,13 +275,13 @@ class ImageCompressionHelper {
       );
     }
     
-    print('✅ No compression needed');
+  
     return imageFile;
   }
   
   /// Quick compression with preset settings
   static Future<File> quickCompress(File imageFile, {bool isDocument = true}) async {
-    print('⚡ Quick compression for ${isDocument ? "document" : "photo"}');
+  
     
     return await _compressWithSettings(
       imageFile,
@@ -316,11 +298,7 @@ class ImageCompressionHelper {
       final compressedSize = await compressed.length() / 1024;
       final reduction = ((originalSize - compressedSize) / originalSize * 100);
       
-      print('\n📊 COMPRESSION STATISTICS:');
-      print('   Original: ${originalSize.toStringAsFixed(2)} KB');
-      print('   Compressed: ${compressedSize.toStringAsFixed(2)} KB');
-      print('   Reduction: ${reduction.toStringAsFixed(1)}%');
-      print('   File size under 250KB: ${compressedSize <= 250 ? "✅ YES" : "❌ NO"}');
+
     } catch (e) {
       print('Error calculating stats: $e');
     }
