@@ -243,7 +243,9 @@
   "cpfPerUnit": "प्रति यूनिट CPF",
   "freeCpf": "मुफ़्त CPF",
 
-  "grandTotal": "कुल योग"
+  "grandTotal": "कुल योग",
+  "rejectedMessage": "आपका भुगतान अस्वीकृत कर दिया गया है।"
+
 
 
 

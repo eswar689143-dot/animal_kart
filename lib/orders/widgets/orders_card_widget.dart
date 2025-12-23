@@ -24,8 +24,10 @@ class BuffaloOrderCard extends StatelessWidget {
     final String status = order.paymentStatus.toUpperCase();
     final bool isAdminVerificationPending = order.paymentStatus.toUpperCase() == "PENDING_ADMIN_VERIFICATION";
     final bool isPaid = status == "PAID";
+    final bool isRejected = status == "REJECTED";
+
      final bool showPaymentType =
-      (isPaid || isAdminVerificationPending) &&
+      (isPaid || isAdminVerificationPending || isRejected) &&
       order.paymentType != null;
 
     final bool isPendingPayment = status == "PENDING_PAYMENT";
@@ -122,6 +124,10 @@ String localizedPaymentType(BuildContext context, String paymentType) {
           if (isAdminReview)
             _statusChip(context.tr("adminReview"), const Color(0xFF7E57C2)),
 
+          if (isRejected)
+            _statusChip(context.tr("Rejected"), Colors.red),
+
+
                 ],
               ),
             ),
@@ -177,13 +183,7 @@ Padding(
             ),
           ),
 
-            // Text(
-            //   "${order.numUnits} ${context.tr("unit")} + CPF",
-            //   style: const TextStyle(
-            //     fontSize: 12,
-            //     fontWeight: FontWeight.w700,
-            //   ),
-            // ),
+          
           ],
         ),
       ),
@@ -364,16 +364,18 @@ Padding(
                   const SizedBox(height: 6),
 
                   /// INFO MESSAGE
-                  if (isPendingPayment || isAdminReview)
+                  if (isPendingPayment || isAdminReview || isRejected)
                     Row(
                       children: [
                         const Icon(Icons.info_outline, size: 16, color: Colors.grey),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
-                            isPendingPayment
-                                ? context.tr("bankDetailsNext")
-      : context.tr("orderUnderReview"),
+                                      isPendingPayment
+              ? context.tr("bankDetailsNext")
+              : isAdminReview
+                  ? context.tr("orderUnderReview")
+                  : context.tr("rejectedMessage"), 
 
                             style: const TextStyle(
                               fontSize: 12,
@@ -427,9 +429,6 @@ Padding(
       style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
     );
   }
-
-   
-  
 }
 
 

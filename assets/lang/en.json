@@ -230,7 +230,9 @@
   "numberOfBuffaloes": "Number of Buffaloes",
   
   "totalUnits": "Total Units",
-  "cpfPerUnit": "CPF per Unit"
+  "cpfPerUnit": "CPF per Unit",
+  "rejectedMessage": "Your payment has been rejected."
+
  
 
 

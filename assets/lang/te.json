@@ -242,7 +242,9 @@
   "cpfPerUnit": "ప్రతి యూనిట్ CPF",
   "freeCpf": "ఉచిత CPF",
 
-  "grandTotal": "గ్రాండ్ టోటల్"
+  "grandTotal": "గ్రాండ్ టోటల్",
+  "rejectedMessage": "మీ చెల్లింపు తిరస్కరించబడింది."
+
 
 
 
