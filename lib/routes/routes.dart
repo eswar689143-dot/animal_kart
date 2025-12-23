@@ -1,6 +1,6 @@
 import 'package:animal_kart_demo2/auth/screens/login_screen.dart';
 import 'package:animal_kart_demo2/auth/screens/otp_screen.dart';
-import 'package:animal_kart_demo2/auth/screens/register_form.dart';
+import 'package:animal_kart_demo2/auth/screens/register_screen.dart';
 import 'package:animal_kart_demo2/buffalo/screens/bufflo_details_screen.dart';
 import 'package:animal_kart_demo2/manualpayment/screens/payment_pending_screen.dart';
 import 'package:animal_kart_demo2/notification/screens/notification_screen.dart';
