@@ -14,10 +14,7 @@ class _BookingSuccessScreenState extends State<BookingSuccessScreen> {
   void initState() {
     super.initState();
 
-    // Optional auto redirect after 3 sec
-    // Timer(const Duration(seconds: 3), () {
-    //   if (mounted) Navigator.pop(context);
-    // });
+    
   }
 
   @override

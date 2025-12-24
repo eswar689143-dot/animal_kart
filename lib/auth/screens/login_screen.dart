@@ -165,14 +165,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               return;
                             }
                             
-                            // ✅ USER NOT FOUND / ERROR
+                           
                             if (response.status == "error") {
                               FloatingToast.showSimpleToast(response.message);
                               setState(() => _isSendingOtp = false);
                               return;
                             }
 
-                            // ✅ SUCCESS
+                            
                             FloatingToast.showSimpleToast(response.message);
 
                             Navigator.pushNamed(

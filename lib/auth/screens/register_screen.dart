@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:animal_kart_demo2/auth/providers/auth_provider.dart';
 import 'package:animal_kart_demo2/auth/providers/user_provider.dart';

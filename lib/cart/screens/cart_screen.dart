@@ -6,7 +6,6 @@ import 'package:animal_kart_demo2/utils/app_colors.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:animal_kart_demo2/utils/svg_utils.dart';
 import 'package:animal_kart_demo2/widgets/disable_addbutton_widget.dart';
-import 'package:animal_kart_demo2/manualpayment/screens/manual_payment_screen.dart';
 import 'package:animal_kart_demo2/widgets/payment_widgets/successful_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -383,13 +382,12 @@ class CartScreen extends ConsumerWidget {
 
               const SizedBox(width: 18),
 
-              /// ➕ INCREASE BUTTON
               GestureDetector(
                 onTap: insuranceUnits == 0
                     ? () => ref
                         .read(cartProvider.notifier)
                         .increaseInsurance(buff.id)
-                    : null, // ✅ disabled when value is 1+
+                    : null, 
                 child: _circleButton(
                   Icons.add,
                   isDisabled: insuranceUnits != 0,

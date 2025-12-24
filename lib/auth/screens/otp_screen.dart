@@ -171,7 +171,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
               const Spacer(),
 
-              /// ✅ CONTINUE BUTTON
+            
               SizedBox(
                 width: double.infinity,
                 height: 60,
