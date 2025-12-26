@@ -11,8 +11,8 @@ import FirebaseCore
     FirebaseApp.configure()
     GeneratedPluginRegistrant.register(with: self)
     
-    // Prevent screenshot and screen recording
-    self.window.makeSecure()
+    // Prevent screenshot and screen recording (safe optional chaining)
+    self.window?.makeSecure()
     
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
