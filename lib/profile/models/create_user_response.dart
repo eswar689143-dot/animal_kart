@@ -13,7 +13,7 @@ class CreateUserResponse {
     return CreateUserResponse(
       statusCode: json['statuscode'] ?? json['statusCode'] ?? 200,
       status: json['status'] ?? '',
-      message: 'You’ve successfully added a referral',
+      message: json['message']??'',
     );
   }
 }

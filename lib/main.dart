@@ -2,7 +2,9 @@ import 'package:animal_kart_demo2/auth/screens/biometric_lock_screen.dart';
 import 'package:animal_kart_demo2/auth/firebase_options.dart';
 import 'package:animal_kart_demo2/theme/theme_provider.dart';
 import 'package:animal_kart_demo2/utils/location_service.dart';
+import 'package:device_preview/device_preview.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import "package:flutter_localizations/flutter_localizations.dart";
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,11 +29,15 @@ void main() async {
   }
 
   runApp(
+    DevicePreview(
+      enabled: !kReleaseMode,
+      builder: (context) => 
     ProviderScope(
       child: OKToast(
         child: MyApp(isDarkMode: isDarkMode, isLoggedIn: isLoggedIn),
       ),
     ),
+    )
   );
 }
 

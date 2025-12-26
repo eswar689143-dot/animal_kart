@@ -33,8 +33,8 @@ class UserManagementState {
   }
 }
 
-// Combined provider for both fetching and creating users
-final userManagementProvider = StateNotifierProvider<UserManagementNotifier, UserManagementState>(
+// Provider
+final profileProvider = StateNotifierProvider<UserManagementNotifier, UserManagementState>(
   (ref) => UserManagementNotifier(),
 );
 
@@ -44,22 +44,29 @@ class UserManagementNotifier extends StateNotifier<UserManagementState> {
   // Fetch current user profile
   Future<void> fetchCurrentUser() async {
     state = state.copyWith(isLoading: true, error: null);
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final userId = prefs.getString('userMobile');
-      
+
       if (userId == null) {
         throw Exception('User not logged in');
       }
-      
+
       final user = await ApiServices.fetchUserProfile(userId);
-      
-      state = state.copyWith(
-        isLoading: false,
-        currentUser: user,
-        error: null,
-      );
+
+      if (user != null) {
+        state = state.copyWith(
+          isLoading: false,
+          currentUser: user,
+          error: null,
+        );
+      } else {
+        state = state.copyWith(
+          isLoading: false,
+          error: 'User profile not found',
+        );
+      }
     } catch (e) {
       state = state.copyWith(
         isLoading: false,
@@ -78,9 +85,9 @@ class UserManagementNotifier extends StateNotifier<UserManagementState> {
     String role = 'Investor',
   }) async {
     state = state.copyWith(
-      isLoading: true, 
-      error: null, 
-      createUserResponse: null
+      isLoading: true,
+      error: null,
+      createUserResponse: null,
     );
 
     try {
@@ -101,7 +108,11 @@ class UserManagementNotifier extends StateNotifier<UserManagementState> {
           createUserResponse: response,
           error: null,
         );
+
+        // Refresh profile after successful referral
+        await fetchCurrentUser();
       } else {
+        // Keep currentUser even if creation fails
         state = state.copyWith(
           isLoading: false,
           error: 'Failed to create user. Please try again.',
@@ -127,7 +138,3 @@ class UserManagementNotifier extends StateNotifier<UserManagementState> {
     state = UserManagementState();
   }
 }
-
-final profileProvider = StateNotifierProvider<UserManagementNotifier, UserManagementState>(
-  (ref) => UserManagementNotifier(),
-);

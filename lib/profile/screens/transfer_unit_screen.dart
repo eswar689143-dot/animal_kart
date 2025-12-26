@@ -1,168 +1,125 @@
-import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:animal_kart_demo2/utils/app_constants.dart';
 
-class TransferUnitScreen extends StatefulWidget {
- 
+import '../models/coins_model.dart';
+import '../providers/coin_provider.dart';
 
-  const TransferUnitScreen({
-    super.key,
-    
-  });
+class TransferUnitScreen extends ConsumerWidget {
+  const TransferUnitScreen({super.key});
 
   @override
-  State<TransferUnitScreen> createState() => _TransferUnitScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final coinAsync = ref.watch(coinProvider);
 
-class _TransferUnitScreenState extends State<TransferUnitScreen> {
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:Colors.white,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-             
-              IconButton(
-                padding: EdgeInsets.zero,
-                alignment: Alignment.centerLeft,
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
-              ),
+          child: coinAsync.when(
+            loading: () =>
+                const Center(child: CircularProgressIndicator()),
+            error: (e, _) => Center(child: Text(e.toString())),
+            data: (response) {
+              final transactions = response?.transactions;
 
-              const SizedBox(height: 14),
-              Row(
+              double totalCoins = 0;
+
+              for (var item in transactions!) {
+                totalCoins += item.transaction.coins;
+              }
+
+              return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                 
+                  /// BACK
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    alignment: Alignment.centerLeft,
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  /// HEADER
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'coins',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              _formatAmount(totalCoins),
+                              style: const TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Spend coins to unlock your Buffalo! Purchase 1 unit today and get free CPF for an entire year.',
+                              style: TextStyle(fontSize: 14, height: 1.5),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Image.asset(
+                        AppConstants.coinDetailsImage,
+                        width: 90,
+                        height: 90,
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+                  const Divider(),
+
+                  /// ONLY EARNINGS (NO SPENDS)
+                  _StatItem(
+                    title: "lifetime earnings",
+                    value: _formatAmount(totalCoins),
+                  ),
+
+                  const Divider(),
+                  const SizedBox(height: 18),
+
+                  const Text(
+                    "COIN LEDGER",
+                    style: TextStyle(
+                      letterSpacing: 2,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  /// LEDGER LIST
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'coins',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16,
-                            letterSpacing: 0.6,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "3,63,000",
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Spend coins to unlock your Buffalo! Purchase 1 unit today and get free CPF for an entire year.',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 14,
-                            height: 1.5,
-                          ),
-                        ),
-                      ],
+                    child: ListView.builder(
+                      itemCount: transactions.length,
+                      itemBuilder: (context, index) {
+                        final txn = transactions[index].transaction;
+
+                        return CoinLedgerItem(
+                          amount: _formatAmount(txn.coins),
+                          label: _buildLabel(txn),
+                          date: _formatDate(txn.createdAt),
+                        );
+                      },
                     ),
                   ),
-
-                  /// RIGHT COIN IMAGE
-                  Image.asset(AppConstants.coinDetailsImage, // replace with your coin image
-                    width: 90,
-                    height: 90,
-                  ),
                 ],
-              ),
-
-              const SizedBox(height: 8),
-
-              /// Divider
-              const Divider(
-                color:  Colors.black12,
-                thickness: 1,
-              ),
-
-              const SizedBox(height: 8),
-               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  _StatItem(title: "lifetime earnings", value: "3,63,000"),
-                  _StatItem(title: "lifetime spends", value: "0"),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              const Divider(
-                color:  Colors.black12,
-                thickness: 1,
-              ),
-
-              const SizedBox(height: 18),
-
-              /// LEDGER TITLE
-              const Text(
-                "COIN LEDGER",
-                style: TextStyle(
-                  color:  Colors.black,
-                  letterSpacing: 2,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              /// LEDGER LIST
-              Expanded(
-                child: ListView(
-                  children: const [
-                    CoinLedgerItem(
-                      amount: "7,260",
-                      label: "referred investor purchased 1 unit",
-                      date: "16TH DEC",
-                      isCredit: true,
-                    ),
-                    CoinLedgerItem(
-                      amount: "7,260",
-                      label: "referred investor purchased 1 unit",
-                      date: "04TH DEC",
-                       isCredit: true,
-                    ),
-                    CoinLedgerItem(
-                       amount: "7,260",
-                      label: "referred investor purchased 1 unit",
-                      date: "04TH DEC",
-                       isCredit: true,
-                    ),
-                    CoinLedgerItem(
-                      amount: "7,260",
-                      label: "referred investor purchased 1 unit ",
-                      date: "04TH DEC",
-                       isCredit: true,
-                    ),
-                    CoinLedgerItem(
-                      amount: "7,260",
-                      label: "referred investor purchased 1 unit",
-                      date: "30TH NOV",
-                       isCredit: true,
-                    ),
-                    CoinLedgerItem(
-                      amount: "7,260",
-                      label: "referred investor purchased 1 unit ",
-                      date: "30TH NOV",
-                      isCredit: true,
-                    ),
-                  ],
-                ),
-              ),
-
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -170,8 +127,7 @@ class _TransferUnitScreenState extends State<TransferUnitScreen> {
   }
 }
 
-
-
+/// STAT ITEM
 class _StatItem extends StatelessWidget {
   final String title;
   final String value;
@@ -186,7 +142,6 @@ class _StatItem extends StatelessWidget {
         Text(
           value,
           style: const TextStyle(
-            color:  Colors.black,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
@@ -195,8 +150,8 @@ class _StatItem extends StatelessWidget {
         Text(
           title,
           style: const TextStyle(
-            color:  Colors.black54,
             fontSize: 13,
+            color: Colors.black54,
           ),
         ),
       ],
@@ -204,19 +159,17 @@ class _StatItem extends StatelessWidget {
   }
 }
 
-
+/// LEDGER ITEM (ALWAYS CREDIT)
 class CoinLedgerItem extends StatelessWidget {
   final String amount;
   final String label;
   final String date;
-  final bool isCredit;
 
   const CoinLedgerItem({
     super.key,
     required this.amount,
     required this.label,
     required this.date,
-    this.isCredit = false,
   });
 
   @override
@@ -224,28 +177,21 @@ class CoinLedgerItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// ICON
           Container(
             width: 32,
             height: 32,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isCredit ? Colors.green : Colors.red,
-              ),
+              border: Border.all(color: Colors.green),
             ),
-            child: Icon(
-              isCredit ? Icons.north_east : Icons.south_west,
-              color: isCredit ? Colors.green : Colors.red,
+            child: const Icon(
+              Icons.north_east,
               size: 16,
+              color: Colors.green,
             ),
           ),
-
           const SizedBox(width: 14),
-
-          /// DETAILS
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -253,7 +199,6 @@ class CoinLedgerItem extends StatelessWidget {
                 Text(
                   amount,
                   style: const TextStyle(
-                    color:  Colors.black,
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                   ),
@@ -261,26 +206,70 @@ class CoinLedgerItem extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   label,
-                  style: const TextStyle(
-                    color:  Colors.black,
-                    fontSize: 13,
-                  ),
+                  style: const TextStyle(fontSize: 13),
                 ),
               ],
             ),
           ),
-
-          /// DATE
           Text(
             date,
             style: const TextStyle(
-              color:  Colors.black38,
               fontSize: 12,
+              color: Colors.black38,
               letterSpacing: 1,
             ),
           ),
         ],
       ),
     );
+  }
+}
+
+/// HELPERS
+
+String _buildLabel(CoinTransaction txn) {
+  if (txn.noOfUnitsBuy != null) {
+    return 'Referred ${txn.name} purchased ${txn.noOfUnitsBuy} unit';
+  }
+  if (txn.giverName != null) {
+    return 'Coins received from ${txn.giverName}';
+  }
+  return 'Coins credited';
+}
+
+String _formatAmount(double value) {
+  return value.toStringAsFixed(0).replaceAllMapped(
+    RegExp(r'(\d)(?=(\d{3})+(?!\d))'),
+    (m) => '${m[1]},',
+  );
+}
+
+String _formatDate(String date) {
+  try {
+    // API format: dd-MM-yyyy
+    final parts = date.split('-');
+
+    final day = parts[0];
+    final month = parts[1];
+    final year = parts[2];
+
+    const months = {
+      '01': 'JAN',
+      '02': 'FEB',
+      '03': 'MAR',
+      '04': 'APR',
+      '05': 'MAY',
+      '06': 'JUN',
+      '07': 'JUL',
+      '08': 'AUG',
+      '09': 'SEP',
+      '10': 'OCT',
+      '11': 'NOV',
+      '12': 'DEC',
+    };
+
+    return '$day ${months[month]} $year';
+  } catch (_) {
+    return date;
   }
 }
