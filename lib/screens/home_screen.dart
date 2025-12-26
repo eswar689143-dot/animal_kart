@@ -65,7 +65,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     setState(() => _selectedIndex = index);
   }
 
-  void _goToOrdersTab() => setState(() => _selectedIndex = 1);
+  //void _goToOrdersTab() => setState(() => _selectedIndex = 1);
   void _goToHomeTab() => setState(() => _selectedIndex = 0);
 
   @override

@@ -114,7 +114,7 @@ class _BuffaloDetailsScreenState extends ConsumerState<BuffaloDetailsScreen> {
       ),
       data: (buffalo) {
         final totalBuffaloes = quantity;
-        final totalCalves = quantity;
+        // final totalCalves = quantity;
         final buffaloPrice = totalBuffaloes * buffalo.price;
         final cpfAmount = cpfUnitsToPay * buffalo.insurance;
         final totalAmount = buffaloPrice + cpfAmount;

@@ -10,7 +10,7 @@ import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:animal_kart_demo2/profile/widgets/info_card.dart';
 import 'package:animal_kart_demo2/profile/widgets/refer_bottomsheet_widget.dart';
 import 'package:animal_kart_demo2/widgets/coin_widget.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
