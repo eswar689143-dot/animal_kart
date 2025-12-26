@@ -54,33 +54,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            SizedBox(height: SizeConfig.blockHeight * 3),
-            Column(
-              children: [
-                Container(
-                  height: SizeConfig.blockHeight * 10,
-                  width: SizeConfig.blockHeight * 10,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF5DBE8A),
-                    borderRadius: BorderRadius.circular(12),
+            // TOP: Logo + App Name
+            Padding(
+              padding: EdgeInsets.only(top: SizeConfig.blockHeight * 4),
+              child: Column(
+                children: [
+                  Container(
+                    height: SizeConfig.blockHeight * 10,
+                    width: SizeConfig.blockHeight * 10,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF5DBE8A),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Image.asset(AppConstants.onBoardAppLogo),
                   ),
-                  child: Image.asset(AppConstants.onBoardAppLogo),
-                ),
-                Image.asset(
-                  AppConstants.AppNameAsset,
-                  height: SizeConfig.blockHeight * 15,
-                ),
-              ],
+                  SizedBox(height: SizeConfig.blockHeight * 2),
+                  Image.asset(
+                    AppConstants.AppNameAsset,
+                    height: SizeConfig.blockHeight * 12,
+                  ),
+                ],
+              ),
             ),
 
-            SizedBox(height: SizeConfig.blockHeight * 2),
+            SizedBox(height: SizeConfig.blockHeight * 3),
 
-            /// PAGEVIEW
+            // MIDDLE: PageView + Indicators (takes most of the screen)
             Expanded(
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: SizeConfig.blockWidth * 5,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
                 child: Container(
                   padding: EdgeInsets.all(SizeConfig.blockWidth * 5),
                   decoration: BoxDecoration(
@@ -89,60 +91,80 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   child: Column(
                     children: [
+                      // PageView takes all available space
                       Expanded(
                         child: PageView.builder(
                           controller: _pageController,
                           itemCount: AppConstants.onboardingData.length,
-                          onPageChanged: (index) =>
-                              setState(() => currentIndex = index),
+                          onPageChanged: (index) => setState(() => currentIndex = index),
                           itemBuilder: (context, index) {
                             final item = AppConstants.onboardingData[index];
 
                             return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset(
-                                  item.image,
-                                  height: SizeConfig.blockHeight * 30,
+                                // Image takes majority of space but remains flexible
+                                Expanded(
+                                  flex: 5,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: SizeConfig.blockWidth * 4),
+                                    child: Image.asset(
+                                      item.image,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
                                 ),
-                                SizedBox(height: SizeConfig.blockHeight * 2),
+
+                                SizedBox(height: SizeConfig.blockHeight * 3),
+
+                                // Title
                                 Text(
                                   item.title,
                                   textAlign: TextAlign.center,
-                                  style: AppText.bold16,
+                                  style: AppText.bold16.copyWith(fontSize: 20),
                                 ),
-                                SizedBox(height: SizeConfig.blockHeight * 1),
-                                Text(
-                                  item.subtitle,
-                                  textAlign: TextAlign.center,
-                                  style: AppText.regular14,
+
+                                SizedBox(height: SizeConfig.blockHeight * 1.5),
+
+                                // Subtitle
+                                Padding(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: SizeConfig.blockWidth * 4),
+                                  child: Text(
+                                    item.subtitle,
+                                    textAlign: TextAlign.center,
+                                    style: AppText.regular14,
+                                  ),
                                 ),
+
+                                SizedBox(height: SizeConfig.blockHeight * 3),
                               ],
                             );
                           },
                         ),
                       ),
 
-                      SizedBox(height: SizeConfig.blockHeight * 1),
-
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          AppConstants.onboardingData.length,
-                          (index) => AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: EdgeInsets.symmetric(
-                              horizontal: SizeConfig.blockWidth * 1.2,
-                            ),
-                            height: SizeConfig.blockHeight * 1.2,
-                            width: currentIndex == index
-                                ? SizeConfig.blockWidth * 6
-                                : SizeConfig.blockWidth * 2.5,
-                            decoration: BoxDecoration(
-                              color: currentIndex == index
-                                  ? Colors.black
-                                  : Colors.grey.shade400,
-                              borderRadius: BorderRadius.circular(20),
+                      // Page Indicators (Dots)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: SizeConfig.blockHeight * 1),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: List.generate(
+                            AppConstants.onboardingData.length,
+                            (index) => AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: SizeConfig.blockWidth * 1.2),
+                              height: SizeConfig.blockHeight * 1.2,
+                              width: currentIndex == index
+                                  ? SizeConfig.blockWidth * 6
+                                  : SizeConfig.blockWidth * 2.5,
+                              decoration: BoxDecoration(
+                                color: currentIndex == index
+                                    ? Colors.black
+                                    : Colors.grey.shade400,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
                             ),
                           ),
                         ),
@@ -153,13 +175,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-            SizedBox(height: SizeConfig.blockHeight * 2),
+            SizedBox(height: SizeConfig.blockHeight * 3),
 
-            /// BUTTON
+            // BOTTOM: Get Started Button
             Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: SizeConfig.blockWidth * 5,
-              ),
+              padding: EdgeInsets.symmetric(horizontal: SizeConfig.blockWidth * 5),
               child: SizedBox(
                 width: double.infinity,
                 height: SizeConfig.blockHeight * 7,
@@ -187,4 +207,3 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 }
-

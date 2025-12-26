@@ -135,22 +135,22 @@ String localizedPaymentType(BuildContext context, String paymentType) {
             _divider(),
 
             /// ================= DETAILS =================
-Padding(
-  padding: const EdgeInsets.all(14),
-  child: Row(
-    crossAxisAlignment: CrossAxisAlignment.start, // aligns everything at the top
-    children: [
-      // ---------------- IMAGE ----------------
-      ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.asset(
-          "assets/images/buffalo_image2.png",
-          height: 70,
-          width: 100,
-          fit: BoxFit.cover,
-        ),
-      ),
-      const SizedBox(width: 10),
+          Padding(
+            padding: const EdgeInsets.all(14),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start, // aligns everything at the top
+              children: [
+                // ---------------- IMAGE ----------------
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    "assets/images/buffalo_image2.png",
+                    height: 70,
+                    width: 100,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const SizedBox(width: 10),
 
       // ---------------- BUFFALO INFO ----------------
       Expanded(
@@ -166,15 +166,35 @@ Padding(
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Row(
               children: [
-                _valueRow(context, "${order.buffaloCount}", context.tr("buffaloes")),
-                const SizedBox(width: 6),
-                _valueRow(context, "${order.calfCount}", context.tr("calves")),
+                Expanded(
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
+                    children: [
+                        _valueRow(
+                        context,
+                        "${order.buffaloCount}",
+                        order.buffaloCount == 1 
+                            ? context.tr("buffalo")   
+                            : context.tr("buffaloes"),
+                      ),
+                      _valueRow(
+                        context,
+                        "${order.calfCount}",
+                        order.calfCount == 1 
+                            ? context.tr("calf")      
+                            : context.tr("calves"),  
+                      ),
+                        ],
+                      ))
+              
+                
+               
               ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
             "${order.numUnits} ${order.numUnits <= 1.5 ? context.tr("unit") : context.tr("units")} + CPF",
             style: const TextStyle(
@@ -189,12 +209,12 @@ Padding(
       ),
 
         // ---------------- VERTICAL DIVIDER ----------------
-        Container(
-          height: 70, // match image or content height
-          width: 1,
-          color: Colors.grey.withOpacity(0.5),
-          margin: const EdgeInsets.symmetric(horizontal: 10),
-        ),
+              Container(
+                height: 70, // match image or content height
+                width: 1,
+                color: Colors.grey.withOpacity(0.5),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+              ),
 
       // ---------------- TOTAL COLUMN ----------------
           Column(
@@ -372,10 +392,10 @@ Padding(
                         Expanded(
                           child: Text(
                                       isPendingPayment
-              ? context.tr("bankDetailsNext")
-              : isAdminReview
-                  ? context.tr("orderUnderReview")
-                  : context.tr("rejectedMessage"), 
+                        ? context.tr("bankDetailsNext")
+                        : isAdminReview
+                            ? context.tr("orderUnderReview")
+                            : context.tr("rejectedMessage"), 
 
                             style: const TextStyle(
                               fontSize: 12,
