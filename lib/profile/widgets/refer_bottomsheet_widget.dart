@@ -4,8 +4,6 @@ import 'package:animal_kart_demo2/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-
-
 class ReferBottomSheet extends ConsumerWidget {
   final String referralCode;
   final double unitPrice;
@@ -46,69 +44,79 @@ class ReferBottomSheet extends ConsumerWidget {
           ),
           SizedBox(height: isSmallScreen ? 8 : 12),
 
-          /// Title
-          Text(
-            "Refer & Earn",
-            style: TextStyle(
-              fontSize: isSmallScreen ? 18 : 22,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 4),
+          /// Scrollable Content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  /// Title
+                  Center(
+                    child: Text(
+                      "Refer & Earn",
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 18 : 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
 
-          /// Subtitle
-          Text(
-            "Invite friends, earn coins, and convert them into full units.",
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: isSmallScreen ? 12 : 14,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          SizedBox(height: isSmallScreen ? 8 : 12),
+                  /// Subtitle
+                  Center(
+                    child: Text(
+                      "Invite friends, earn coins, and convert them into full units.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: isSmallScreen ? 12 : 14,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 8 : 12),
 
-          /// Section Title
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "How it works",
-              style: TextStyle(
-                fontSize: isSmallScreen ? 14 : 16,
-                fontWeight: FontWeight.w700,
+                  /// Section Title
+                  Text(
+                    "How it works",
+                    style: TextStyle(
+                      fontSize: isSmallScreen ? 14 : 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: isSmallScreen ? 6 : 8),
+
+                  /// Steps
+                  _stepCard(
+                    isSmallScreen,
+                    icon: Icons.shopping_cart,
+                    title: "Purchase Unit",
+                    description: "Buy a unit and unlock referral rewards.",
+                  ),
+                  _stepCard(
+                    isSmallScreen,
+                    icon: Icons.currency_rupee,
+                    title: "Earn Coins",
+                    description: "Every referral gives 5% unit value as coins.",
+                  ),
+                  _stepCard(
+                    isSmallScreen,
+                    icon: Icons.auto_graph,
+                    title: "Complete Unit",
+                    description: "Accumulate coins equal to one unit.",
+                  ),
+                  _stepCard(
+                    isSmallScreen,
+                    icon: Icons.swap_horiz,
+                    title: "Transfer",
+                    description: "Transfer by entering basic details",
+                  ),
+                  SizedBox(height: isSmallScreen ? 8 : 12),
+                ],
               ),
             ),
           ),
-          SizedBox(height: isSmallScreen ? 6 : 8),
 
-          /// Steps (Compact)
-          _stepCard(
-            isSmallScreen,
-            icon: Icons.shopping_cart,
-            title: "Purchase Unit",
-            description: "Buy a unit and unlock referral rewards.",
-          ),
-          _stepCard(
-            isSmallScreen,
-            icon: Icons.currency_rupee,
-            title: "Earn Coins",
-            description: "Every referral gives 5% unit value as coins.",
-          ),
-          _stepCard(
-            isSmallScreen,
-            icon: Icons.auto_graph,
-            title: "Complete Unit",
-            description: "Accumulate coins equal to one unit.",
-          ),
-          _stepCard(
-            isSmallScreen,
-            icon: Icons.swap_horiz,
-            title: "Transfer",
-            description: "Transfer by entering basic details",
-          ),
-
-          SizedBox(height: isSmallScreen ? 8 : 12),
-
-          /// Add Referral Button (Changed from Share)
+          /// Fixed Button at the Bottom
           SizedBox(
             width: double.infinity,
             height: isSmallScreen ? 40 : 50,
@@ -126,8 +134,6 @@ class ReferBottomSheet extends ConsumerWidget {
               ),
             ),
           ),
-
-         
         ],
       ),
     );
@@ -188,39 +194,17 @@ class ReferBottomSheet extends ConsumerWidget {
     );
   }
 
-  
-
   void _showAddReferralDialog(BuildContext context) {
-    // Check if we have current user data
-    if (currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Unable to get user information'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AddReferralDialog(
+      builder: (_) => AddReferralDialog(
         referedByMobile: currentUser!.mobile,
         referedByName: "${currentUser!.firstName} ${currentUser!.lastName}",
         onSuccess: () {
-         Navigator.of(context).pop();
-
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   const SnackBar(
-          //     content: Text('Referral added successfully!'),
-          //     backgroundColor: Colors.green,
-          //   ),
-          // );
+          Navigator.of(context).pop();
         },
       ),
     );
   }
 }
-
-

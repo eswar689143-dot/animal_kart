@@ -8,6 +8,7 @@ import 'package:animal_kart_demo2/buffalo/models/buffalo.dart';
 import 'package:animal_kart_demo2/buffalo/models/unit_selection.dart';
 import 'package:animal_kart_demo2/orders/models/order_model.dart';
 import 'package:animal_kart_demo2/profile/models/%20create_user_request.dart';
+import 'package:animal_kart_demo2/profile/models/coins_model.dart';
 import 'package:animal_kart_demo2/profile/models/create_user_response.dart';
 import 'package:animal_kart_demo2/utils/app_constants.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -270,6 +271,33 @@ static Future<CreateUserResponse?> createUser({
     }
   } catch (e, stack) {
    
+    return null;
+  }
+}
+
+
+
+static Future<CoinTransactionResponse?> fetchCoinTransactions(String mobile) async {
+  try {
+    final url = "${AppConstants.apiUrl}/users/coinTransaction/$mobile";
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        HttpHeaders.contentTypeHeader: AppConstants.applicationJson,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return CoinTransactionResponse.fromJson(data);
+    } else {
+      debugPrint("Failed to load coin transactions: ${response.statusCode}");
+      return null;
+    }
+  } catch (e, stack) {
+    debugPrint("COIN API ERROR: $e");
+    debugPrint(stack.toString());
     return null;
   }
 }
