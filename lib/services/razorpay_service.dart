@@ -32,7 +32,7 @@ class RazorPayService {
     var options = {
       'key': 'rzp_test_ChtIh4impxVRVG',
       'amount': amount * 100, // in paise
-      'name': 'Markwave Cart',
+      'name': 'AnimalKart',
       'description': 'Buffalo Purchase',
       'prefill': {
         'contact': '9876543210',

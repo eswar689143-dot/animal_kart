@@ -272,7 +272,9 @@ class InvoiceGenerator {
 }
 
 /// DATE FORMAT
+
 String formatOrderDate(DateTime? date) {
   if (date == null) return "";
-  return DateFormat('dd MMM yyyy, hh:mm a').format(date);
+  return DateFormat('dd MMM yyyy, hh:mm a')
+      .format(date.toLocal()); // convert to local time
 }
