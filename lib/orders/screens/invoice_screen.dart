@@ -13,7 +13,8 @@ class InvoiceGenerator {
 
     /// ---------- BUSINESS LOGIC ----------
     const double halfUnitCost = 175000; // cost per 0.5 unit (1 buffalo + 1 calf)
-    const double cpfPerUnit = 13000; // CPF per half unit
+   double cpfPerUnit = order.cpfUnitCost; // get from backend
+ //const double cpfPerUnit = 13000; // CPF per half unit
 
     double units = order.numUnits; // exact units entered
 
